@@ -41,6 +41,14 @@ class WarmupPolyLR(torch.optim.lr_scheduler._LRScheduler):
         self.constant_ending = constant_ending
         super().__init__(optimizer, last_epoch)
 
+        print(f'j) math.pow: {math.pow((1.0 - self.last_epoch / self.max_iters), self.power)}')
+        print(f'j) 1example: {self.base_lrs[0] * warmup_factor * math.pow((1.0 - self.last_epoch / self.max_iters), self.power)}')
+        print(f'j) last_epoch: {self.last_epoch}')
+        print(f'j) max_iters: {self.max_iters}')
+        print(f'j) power: {self.power}')
+        print(f'j) base_lrs: {self.base_lrs}')
+
+    
     def get_lr(self) -> List[float]:
         warmup_factor = _get_warmup_factor_at_iter(
             self.warmup_method, self.last_epoch, self.warmup_iters, self.warmup_factor
