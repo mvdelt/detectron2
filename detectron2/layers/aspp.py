@@ -131,14 +131,17 @@ class ASPP(nn.Module):
         if self.pool_kernel_size is not None:
             if size[0] % self.pool_kernel_size[0] or size[1] % self.pool_kernel_size[1]:
                 # i.21.2.11.15:00) https://github.com/facebookresearch/detectron2/issues/2072#issuecomment-754644505
-                print(f'j) shape of the input is not divisible by the `pool_kernel_size`.\n\
-                    Input size: {size}, `pool_kernel_size`: {self.pool_kernel_size}')
+                # print(f'j) shape of the input is not divisible by the `pool_kernel_size`.\n\
+                #     Input size: {size}, `pool_kernel_size`: {self.pool_kernel_size}')
                 #  참고로, 인풋쉐입의 가로세로사이즈가 pool_kernel_size 의 가로세로값으로 나눠져야하는것같은데, 
                 #  밑에 영어문장은 반대로된듯함.
-                # raise ValueError(
-                #     "`pool_kernel_size` must be divisible by the shape of inputs. "
-                #     "Input size: {} `pool_kernel_size`: {}".format(size, self.pool_kernel_size)
-                # )
+                # i.21.2.11.22:57) cfg 의 MODEL.PANOPTIC_DEEPLAB.SIZE_DIVISIBILITY 가 -1로 돼있네.
+                #  이거 나눠질 단위로(ex:32) 해주면, ImageList.from_tensors 함수가 그에맞게 알아서 패딩 붙여주나본데?
+                #  일단 그렇게 cfg 값 바꿔줘보고 요 에러 또 뜨는지 보자.
+                raise ValueError(
+                    "`pool_kernel_size` must be divisible by the shape of inputs. "
+                    "Input size: {} `pool_kernel_size`: {}".format(size, self.pool_kernel_size)
+                )
         res = []
         for conv in self.convs:
             res.append(conv(x))
