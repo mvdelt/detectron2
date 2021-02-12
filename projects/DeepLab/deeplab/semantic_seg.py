@@ -239,6 +239,8 @@ class DeepLabV3PlusHead(nn.Module):
         # Reverse feature maps into top-down order (from low to high resolution)
         for f in self.in_features[::-1]:
             x = features[f]
+            # i.21.2.12.20:11) 요 self.decoder[f]["project_conv"] 가 ASPP 객체임(경우에따라다르지만).
+            #  즉, 인풋(지금 요기 넣어주는 x)사이즈가 pool_kernel_size 로 나눠지지 않는다는 에러가 요거 실행하면서 뜨는거임.
             proj_x = self.decoder[f]["project_conv"](x)
             if self.decoder[f]["fuse_conv"] is None:
                 # This is aspp module
