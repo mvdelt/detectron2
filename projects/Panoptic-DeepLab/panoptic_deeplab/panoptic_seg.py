@@ -58,7 +58,7 @@ class PanopticDeepLab(nn.Module):
             == cfg.MODEL.PANOPTIC_DEEPLAB.USE_DEPTHWISE_SEPARABLE_CONV
         )
         self.size_divisibility = cfg.MODEL.PANOPTIC_DEEPLAB.SIZE_DIVISIBILITY
-        # i.21.2.12.16:18)
+        # i.21.2.12.16:18) for debugging.
         print(f'j) PanopticDeepLab.size_divisibility: {self.size_divisibility}')
         self.benchmark_network_speed = cfg.MODEL.PANOPTIC_DEEPLAB.BENCHMARK_NETWORK_SPEED
 
