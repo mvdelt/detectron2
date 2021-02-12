@@ -253,6 +253,10 @@ def register_all_ade20k(root):
 # True for open source;
 # Internally at fb, we register them elsewhere
 if __name__.endswith(".builtin"):
+
+    # i.21.2.12.23:52) for test.
+    print('j) This is detectron2/data/datasets/builtin.py line 258 !!!!!!')
+
     # Assume pre-defined datasets live in `./datasets`.
     _root = os.getenv("DETECTRON2_DATASETS", "datasets")
     register_all_coco(_root)

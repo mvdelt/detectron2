@@ -16,4 +16,7 @@ from .dataset_mapper import DatasetMapper
 # ensure the builtin datasets are registered
 from . import datasets, samplers  # isort:skip
 
+# i.21.2.12.23:52) for test.
+print('j) This is detectron2/data/__init__.py line 20 !!!!!!')
+
 __all__ = [k for k in globals().keys() if not k.startswith("_")]

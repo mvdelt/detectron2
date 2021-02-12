@@ -5,5 +5,7 @@ from .lvis import load_lvis_json, register_lvis_instances, get_lvis_instances_me
 from .pascal_voc import load_voc_instances, register_pascal_voc
 from . import builtin as _builtin  # ensure the builtin datasets are registered
 
+# i.21.2.12.23:52) for test.
+print('j) This is detectron2/data/datasets/__init__.py line 9 !!!!!!')
 
 __all__ = [k for k in globals().keys() if not k.startswith("_")]
