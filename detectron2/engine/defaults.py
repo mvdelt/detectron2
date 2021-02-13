@@ -648,3 +648,31 @@ for _attr in ["model", "data_loader", "optimizer"]:
             lambda self, value, x=_attr: setattr(self._trainer, x, value),
         ),
     )
+
+# i. 21.2.13.13:57) 왜 DefaultTrainer 의 __init__ 에서 self.model = ~~ 이렇게 할당 안해주고,
+# 굳이 바로위처럼 setattr 사용해서 model, data_loader, optimizer 를 저렇게 할당해주는지
+# 준범에게 물어보니, 코드를 제대로 보진 않았지만 뭐 대충 느낌에는,
+# 아마 "아래 세줄"과 비슷하게 해주고싶은데, __init__ 은 DefaultTrainer 의 인스턴스화 시점에서야 실행되니까,
+# 그제서야 DefaultTrainer(의객체)._trainer 가 할당되니까 그런것같다고 함.
+# 바로위의 코드는 DefaultTrainer 가 객체화되기 전에, 
+# 임포트만 되더라도 지금 이 파일(defaults.py)이 바로 실행될테니, 
+# 그때 곧바로 바로위 코드가 실행될거니까.
+# 그리고 DefaultTrainer (객체가 아닌)클래스 자체에다가 할당해주고있지.
+#
+# 참고로, 예전엔 바로위 코드 없었고, DefaultTrainer 가 SimpleTrainer 를 상속했었음.
+# 지금은 DefaultTrainer 가 TrainerBase 를 상속하게 바꼈고, 
+# 대신 DefaultTrainer 의 __init__ 에서 self._trainer 에 원하는 트레이너를 할당하게 바꼈음.
+# 
+# 깃헙 소스코드 변경 코멘트 참고:
+# DefaultTrainer: compose SimpleTrainer instead of inheritance
+# Summary: allow composing other trainers (next diff)
+#  ->즉, SimpleTrainer 를 상속하지않고 compose(객체화 의 의미일듯)하고,
+#    다른종류의 트레이너들도 compose 할수있도록 한다는거.
+# 
+# TODO Q: 근데 그래도 굳이 self.model = ~~ 이렇게 해주지 않는 이유가 뭔지 모르겟는데..??
+# compose 해주는 트레이너 내부에서 model, data_loader, optimizer 를 수정해줄수도 있다고 생각한건가??
+#
+# "아래 세줄"(준범이가 설명해주느라 직접타자친것임. 슈도코드마냥.):
+# DefaultTrainer.model = DefaultTrainer._trainer.model
+# DefaultTrainer.data_loader = DefaultTrainer._trainer.data_loader
+# DefaultTrainer.optimizer = DefaultTrainer._trainer.optimizer
