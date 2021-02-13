@@ -150,6 +150,10 @@ class Trainer(DefaultTrainer):
         Returns:
             list[HookBase]:
         """
+        
+        # i.21.2.13.15:22)
+        print('j) This is build_hooks method, evaluation hook removed version!!')
+        
         cfg = self.cfg.clone()
         cfg.defrost()
         cfg.DATALOADER.NUM_WORKERS = 0  # save some memory and time for PreciseBN
