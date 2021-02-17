@@ -563,6 +563,8 @@ def check_metadata_consistency(key, dataset_names):
             raise ValueError("Datasets have different metadata '{}'!".format(key))
 
 
+# i.21.2.17.18:31) 요함수 옛날이름은 build_transform_gen 이었음.
+#  참고로, 과거 트랜스폼젠 클래스는 이제 오그멘테이션 클래스로 이름 바뀜.
 def build_augmentation(cfg, is_train):
     """
     Create a list of default :class:`Augmentation` from config.
@@ -579,6 +581,7 @@ def build_augmentation(cfg, is_train):
         min_size = cfg.INPUT.MIN_SIZE_TEST
         max_size = cfg.INPUT.MAX_SIZE_TEST
         sample_style = "choice"
+    # i.21.2.17.18:35) 아래처럼 원하는 오그멘테이션(과거 트랜스폼젠)객체 추가해주면 됨.
     augmentation = [T.ResizeShortestEdge(min_size, max_size, sample_style)]
     if is_train and cfg.INPUT.RANDOM_FLIP != "none":
         augmentation.append(

@@ -84,6 +84,9 @@ class DatasetMapper:
 
     @classmethod
     def from_config(cls, cfg, is_train: bool = True):
+        # i.21.2.17.18:33) 요함수 옛날이름: build_transform_gen.
+        #  요함수 수정해주면 데이타오그멘테이션 커스터마이징 가능.
+        #  참고로, 과거 트랜스폼젠 클래스는 이제 오그멘테이션 클래스로 이름 바뀜.
         augs = utils.build_augmentation(cfg, is_train)
         if cfg.INPUT.CROP.ENABLED and is_train:
             augs.insert(0, T.RandomCrop(cfg.INPUT.CROP.TYPE, cfg.INPUT.CROP.SIZE))

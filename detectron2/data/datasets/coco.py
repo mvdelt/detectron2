@@ -96,6 +96,8 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
                 )
         id_map = {v: i for i, v in enumerate(cat_ids)}
         meta.thing_dataset_id_to_contiguous_id = id_map
+        # i.21.2.17.20:40) ->카테고리id들을 0부터 시작하는 연속적인 정수가 되도록 해줌.
+        #  Det2 데이터 형식의 요구사항임. (모델이받아들이는형식 말고.)
 
     # sort indices for reproducible results
     img_ids = sorted(coco_api.imgs.keys())
