@@ -88,17 +88,17 @@ _PREDEFINED_SPLITS_COCO_PANOPTIC = {
         # It is used by PanopticFPN.
         # You can use the script at detectron2/datasets/prepare_panoptic_fpn.py
         # to create these directories.
-        "coco/panoptic_stuff_train2017",
+        "coco/panoptic_stuff_train2017", # i.21.2.26.00:26) <-세번째녀석들은 panoptic FPN 에서만 특별히 사용하는것인듯.
     ),
     "coco_2017_val_panoptic": (
         "coco/panoptic_val2017",
         "coco/annotations/panoptic_val2017.json",
-        "coco/panoptic_stuff_val2017",
+        "coco/panoptic_stuff_val2017", # i.21.2.26.00:26) <-세번째녀석들은 panoptic FPN 에서만 특별히 사용하는것인듯.
     ),
     "coco_2017_val_100_panoptic": (
         "coco/panoptic_val2017_100",
         "coco/annotations/panoptic_val2017_100.json",
-        "coco/panoptic_stuff_val2017_100",
+        "coco/panoptic_stuff_val2017_100", # i.21.2.26.00:26) <-세번째녀석들은 panoptic FPN 에서만 특별히 사용하는것인듯.
     ),
 }
 
@@ -116,6 +116,7 @@ def register_all_coco(root):
 
     for (
         prefix,
+        # i.21.2.26.00:26) 세번째녀석인 semantic_root 는 panoptic FPN 에서만 특별히 사용하는것인듯.
         (panoptic_root, panoptic_json, semantic_root),
     ) in _PREDEFINED_SPLITS_COCO_PANOPTIC.items():
         prefix_instances = prefix[: -len("_panoptic")]
@@ -129,7 +130,7 @@ def register_all_coco(root):
             image_root,
             os.path.join(root, panoptic_root),
             os.path.join(root, panoptic_json),
-            os.path.join(root, semantic_root),
+            os.path.join(root, semantic_root), # i.21.2.26.00:26) <-세번째녀석은 panoptic FPN 에서만 특별히 사용하는것인듯.
             instances_json,
         )
         # The "standard" version of COCO panoptic segmentation dataset,
