@@ -259,7 +259,7 @@ if __name__.endswith(".builtin"):
     print('j) This is detectron2/data/datasets/builtin.py line 258 !!!!!!')
 
     # Assume pre-defined datasets live in `./datasets`.
-    _root = os.getenv("DETECTRON2_DATASETS", "datasets")
+    _root = os.getenv("DETECTRON2_DATASETS", "datasets") # i. 두번째 인풋인자는 디폴트값임. (첫째인풋에대한게 없을때 사용할) /21.3.10.11:02.
     register_all_coco(_root)
     register_all_lvis(_root)
     register_all_cityscapes(_root)

@@ -1,10 +1,27 @@
+
+
+##############################################################################################################
+#
+# i.21.3.10.23:44) Det2 의 cityscapes_panoptic.py 파일의 
+#  register_all_cityscapes_panoptic, load_cityscapes_panoptic 등의 함수들을 
+#  내panoptic플젝에 맞게 수정해주려고 만든 파일.# 
+#  TODO Q: 근데 Det2 설치할때 이렇게 내가 새로 추가해준 파일은 어케되는거지..?
+#
+# i.21.3.11.10:27) 알고있듯이 builtin.py 에서 이것저것 기본적인것들 다 레지스터해주는데
+#  이때 register_all_cityscapes_panoptic 도 레지스터해주는데,
+#  지금 내 플젝에선 내가 따로 호출해서 레지스터 해주자.
+#
+##############################################################################################################
+
+
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 import json
 import logging
 import os
 
 from detectron2.data import DatasetCatalog, MetadataCatalog
-from detectron2.data.datasets.builtin_meta import CITYSCAPES_CATEGORIES
+# from detectron2.data.datasets.builtin_meta import CITYSCAPES_CATEGORIES    # i.21.3.11.00:00) ->이거쓰면 안됨. 내플젝이라.
 from detectron2.utils.file_io import PathManager
 
 """
@@ -12,8 +29,104 @@ This file contains functions to register the Cityscapes panoptic dataset to the 
 """
 
 
+# # All Cityscapes categories, together with their nice-looking visualization colors
+# # It's from https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/helpers/labels.py  # noqa
+# CITYSCAPES_CATEGORIES = [
+#     {"color": (128, 64, 128), "isthing": 0, "id": 7, "trainId": 0, "name": "road"},
+#     {"color": (244, 35, 232), "isthing": 0, "id": 8, "trainId": 1, "name": "sidewalk"},
+#     {"color": (70, 70, 70), "isthing": 0, "id": 11, "trainId": 2, "name": "building"},
+#     {"color": (102, 102, 156), "isthing": 0, "id": 12, "trainId": 3, "name": "wall"},
+#     {"color": (190, 153, 153), "isthing": 0, "id": 13, "trainId": 4, "name": "fence"},
+#     {"color": (153, 153, 153), "isthing": 0, "id": 17, "trainId": 5, "name": "pole"},
+#     {"color": (250, 170, 30), "isthing": 0, "id": 19, "trainId": 6, "name": "traffic light"},
+#     {"color": (220, 220, 0), "isthing": 0, "id": 20, "trainId": 7, "name": "traffic sign"},
+#     {"color": (107, 142, 35), "isthing": 0, "id": 21, "trainId": 8, "name": "vegetation"},
+#     {"color": (152, 251, 152), "isthing": 0, "id": 22, "trainId": 9, "name": "terrain"},
+#     {"color": (70, 130, 180), "isthing": 0, "id": 23, "trainId": 10, "name": "sky"},
+#     {"color": (220, 20, 60), "isthing": 1, "id": 24, "trainId": 11, "name": "person"},
+#     {"color": (255, 0, 0), "isthing": 1, "id": 25, "trainId": 12, "name": "rider"},
+#     {"color": (0, 0, 142), "isthing": 1, "id": 26, "trainId": 13, "name": "car"},
+#     {"color": (0, 0, 70), "isthing": 1, "id": 27, "trainId": 14, "name": "truck"},
+#     {"color": (0, 60, 100), "isthing": 1, "id": 28, "trainId": 15, "name": "bus"},
+#     {"color": (0, 80, 100), "isthing": 1, "id": 31, "trainId": 16, "name": "train"},
+#     {"color": (0, 0, 230), "isthing": 1, "id": 32, "trainId": 17, "name": "motorcycle"},
+#     {"color": (119, 11, 32), "isthing": 1, "id": 33, "trainId": 18, "name": "bicycle"},
+# ]
+
+# a label and all meta information
+Label = namedtuple( 'Label' , [
+
+    'name'        , # The identifier of this label, e.g. 'car', 'person', ... .
+                    # We use them to uniquely name a class
+
+    'id'          , # An integer ID that is associated with this label.
+                    # The IDs are used to represent the label in ground truth images
+                    # An ID of -1 means that this label does not have an ID and thus
+                    # is ignored when creating ground truth images (e.g. license plate).
+                    # Do not modify these IDs, since exactly these IDs are expected by the
+                    # evaluation server.
+
+    'trainId'     , # Feel free to modify these IDs as suitable for your method. Then create
+                    # ground truth images with train IDs, using the tools provided in the
+                    # 'preparation' folder. However, make sure to validate or submit results
+                    # to our evaluation server using the regular IDs above!
+                    # For trainIds, multiple labels might have the same ID. Then, these labels
+                    # are mapped to the same class in the ground truth images. For the inverse
+                    # mapping, we use the label that is defined first in the list below.   # <-inverse mapping에선 아래 labels리스트의 (동일한 trainId를 가지는 Label들 중)1번째녀석을 사용한다고 되어있지./i.21.3.5.18:58.
+                    # For example, mapping all void-type classes to the same ID in training,
+                    # might make sense for some approaches.
+                    # Max value is 255!
+
+    'category'    , # The name of the category that this label belongs to
+
+    'categoryId'  , # The ID of this category. Used to create ground truth images
+                    # on category level.
+
+    'hasInstances', # Whether this label distinguishes between single instances or not
+
+    # i.21.3.5.17:19) ignoreInEval 값이 True 면 evaluation(cityscapes 대회서버에서 하는 이밸류에이션)에 반영 안됨!!!
+    #  그래서 train시에만 자유롭게 정해서 이용하라고 trainId 가 있는거고, 
+    #  요아래 Label 들의 trainId 값들은 대회측에서 일단 기본값으로 정해논건데(맘대로바꿀수있음), 
+    #  ignoreInEval 이 True 인 놈들에 대해서는 trainId 값을 255나 -1등으로 해놓은듯.
+    'ignoreInEval', # Whether pixels having this class as ground truth label are ignored
+                    # during evaluations or not
+
+    'color'       , # The color of this label
+    ] )
+
+
+# i.21.3.11.00:00) cityscapesscripts 의 labels.py 에 내가 내플젝에맞게 새로 정해준 'labels' 복붙함.
+labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'unlabeled_Label'      ,  0 ,        0 , 'voidJ'           , 0       , False        , False        , (  0,  0,  0) ),
+    Label(  'Rt_sinus'             ,  1 ,        1 , 'sinusJ'          , 1       , False        , False        , (  0,  0,255) ),
+    Label(  'Lt_sinus'             ,  2 ,        2 , 'sinusJ'          , 1       , False        , False        , (255,  0,  0) ),
+    Label(  'maxilla'              ,  3 ,        3 , 'boneJ'           , 2       , False        , False        , (162,156,255) ),
+    Label(  'mandible'             ,  4 ,        4 , 'boneJ'           , 2       , False        , False        , (185,181,247) ),
+    Label(  'Rt_canal'             ,  5 ,        5 , 'canalJ'          , 3       , False        , False        , ( 76, 68,212) ),
+    Label(  'Lt_canal'             ,  6 ,        6 , 'canalJ'          , 3       , False        , False        , (194, 37,144) ),
+    Label(  't_normal'             ,  7 ,        7 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
+    Label(  't_tx'                 ,  8 ,        8 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
+    Label(  'impl'                 ,  9 ,        9 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
+]
+
+# i.21.3.10.23:59) 기존 CITYSCAPES_CATEGORIES 의 형태로 변경해줌.
+#  일단 CITYSCAPES_CATEGORIES 라는 변수명 유지하면서 _J 만 붙여줬음.
+CITYSCAPES_CATEGORIES_J = \
+[{"color": label.color, "isthing": 1 if label.hasInstances else 0, "id": label.id, "trainId": label.trainId, "name": label.name} for label in labels]
+
+
+
+
 logger = logging.getLogger(__name__)
 
+
+# i.21.3.11.00:15) 
+#  TODO: 1) 내플젝은 city가 없음. 
+#        2) cityscapes데이터셋의 어노json의 각 annotation의 'image_id' 는 애시당초 'basename' 과 동일하도록 만들어져있음. 
+#           "frankfurt_000000_000294" 이런식. 나는 이걸 지금 A00B 뭐 이런식으로 해논상태인거지. imp2_45.jpg 뭐이런걸 2045 이런식으로. 
+#           굳이그렇게바꿔줄필요없이 그냥 "imp2_45" 이렇게 해줘도 됨.
+#           그리고 "_leftImg8bit.png" 관련된부분들도 수정하고. 예를들어 난 "_leftImg8bit.png" 을 제거해준다거나 할 필요가 없지.
 
 def get_cityscapes_panoptic_files(image_dir, gt_dir, json_info):
     files = []
@@ -127,16 +240,35 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     return ret
 
 
-_RAW_CITYSCAPES_PANOPTIC_SPLITS = {
-    "cityscapes_fine_panoptic_train": (
-        "cityscapes/leftImg8bit/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
-        "cityscapes/gtFine/cityscapes_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
-        "cityscapes/gtFine/cityscapes_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+# _RAW_CITYSCAPES_PANOPTIC_SPLITS = {
+#     "cityscapes_fine_panoptic_train": (
+#         "cityscapes/leftImg8bit/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+#         "cityscapes/gtFine/cityscapes_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+#         "cityscapes/gtFine/cityscapes_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+#     ),
+#     "cityscapes_fine_panoptic_val": (
+#         "cityscapes/leftImg8bit/val", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+#         "cityscapes/gtFine/cityscapes_panoptic_val", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+#         "cityscapes/gtFine/cityscapes_panoptic_val.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+#     ),
+#     # "cityscapes_fine_panoptic_test": not supported yet
+# }
+
+
+# i.21.3.11.12:57) TODO: 지금 여기 하다말앗음!! 내플젝에맞게 폴더구조 변경해주고있음. 폴더명 바꿔주고있고.
+#  점점 cityscapes 데이터셋 폴더구조와 비슷해지네ㅋ.
+#  띄어쓰기해놓은곳 우측부분들이 아직 수정 못해준것들임.
+_RAW_CITYSCAPES_PANOPTIC_SPLITS_J = {
+    "panopticSeg_dentPanoJ_train": (
+        "panopticSeg_dentPanoJ/inputOriPano/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+        "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+        "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
     ),
-    "cityscapes_fine_panoptic_val": (
-        "cityscapes/leftImg8bit/val", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
-        "cityscapes/gtFine/cityscapes_panoptic_val", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
-        "cityscapes/gtFine/cityscapes_panoptic_val.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+    # i.21.3.11.22:56) TODO: val 관련된것들은 아직 안만들어준 상태임.
+    "panopticSeg_dentPanoJ_val": (
+        "panopticSeg_dentPanoJ/inputOriPano/val", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+        "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_val", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+        "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_val.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
     ),
     # "cityscapes_fine_panoptic_test": not supported yet
 }
@@ -150,10 +282,10 @@ def register_all_cityscapes_panoptic(root):
     # visualization function in D2 handles thing and class classes differently
     # due to some heuristic used in Panoptic FPN. We keep the same naming to
     # enable reusing existing visualization functions.
-    thing_classes = [k["name"] for k in CITYSCAPES_CATEGORIES]
-    thing_colors = [k["color"] for k in CITYSCAPES_CATEGORIES]
-    stuff_classes = [k["name"] for k in CITYSCAPES_CATEGORIES]
-    stuff_colors = [k["color"] for k in CITYSCAPES_CATEGORIES]
+    thing_classes = [k["name"] for k in CITYSCAPES_CATEGORIES_J]
+    thing_colors = [k["color"] for k in CITYSCAPES_CATEGORIES_J]
+    stuff_classes = [k["name"] for k in CITYSCAPES_CATEGORIES_J]
+    stuff_colors = [k["color"] for k in CITYSCAPES_CATEGORIES_J]
 
     meta["thing_classes"] = thing_classes
     meta["thing_colors"] = thing_colors
@@ -186,7 +318,7 @@ def register_all_cityscapes_panoptic(root):
     thing_dataset_id_to_contiguous_id = {}
     stuff_dataset_id_to_contiguous_id = {}
 
-    for k in CITYSCAPES_CATEGORIES:
+    for k in CITYSCAPES_CATEGORIES_J:
         if k["isthing"] == 1:
             thing_dataset_id_to_contiguous_id[k["id"]] = k["trainId"]
         else:
@@ -195,7 +327,7 @@ def register_all_cityscapes_panoptic(root):
     meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
     meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id
 
-    for key, (image_dir, gt_dir, gt_json) in _RAW_CITYSCAPES_PANOPTIC_SPLITS.items():
+    for key, (image_dir, gt_dir, gt_json) in _RAW_CITYSCAPES_PANOPTIC_SPLITS_J.items():
         image_dir = os.path.join(root, image_dir)
         gt_dir = os.path.join(root, gt_dir)
         gt_json = os.path.join(root, gt_json)
