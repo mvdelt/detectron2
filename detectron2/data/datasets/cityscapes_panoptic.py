@@ -85,19 +85,29 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     ), "Please run `python cityscapesscripts/preparation/createPanopticImgs.py` to generate label files."  # noqa
     with open(gt_json) as f:
         json_info = json.load(f)
+
+
     # i. files: [(imgFilePath, labelPngFilePath, segments_info), (~~), ...] /21.3.10.18:34.
     #  files 의 각 튜플은 하나의 이미지에 대응됨.
     files = get_cityscapes_panoptic_files(image_dir, gt_dir, json_info) 
     ret = []
     for image_file, label_file, segments_info in files: # i. 각각 (하나의 이미지에 대응되는) 원본이미지파일경로, 어노png경로, segments_info(리스트). /21.3.10.18:34.
-        # i. sem_label_file ex: "frankfurt_000000_000294_gtFine_labelTrainIds.png" /21.3.10.18:44
+        # i. image_file ex: "~~\leftImg8bit\val\frankfurt\frankfurt_000000_000294_leftImg8bit.png"
+        # i. label_file ex: "~~\gtFine\cityscapes_panoptic_val\frankfurt_000000_000294_gtFine_panoptic.png"
+       
+        # i. sem_label_file ex: "~~\gtFine\val\frankfurt\frankfurt_000000_000294_gtFine_labelTrainIds.png" 
+        #  ->leftImg8bit 를 gtFine으로 바꿨는데, 파일명 뿐 아니라 폴더명에도 leftImg8bit 있어서 그것도 gtFine 으로 바꼈음!!! 이거모르고 틀린줄알았네;;;/21.3.12.8:00.
         sem_label_file = (
             image_file.replace("leftImg8bit", "gtFine").split(".")[0] + "_labelTrainIds.png"  
         )
         segments_info = [_convert_category_id(x, meta) for x in segments_info]
+
         ret.append(
+            # i.21.3.12.8:19) 결국 요게 핵심. 
+            #  지금 이 함수(load_cityscapes_panoptic)의 목적이 이 딕셔너리들의 리스트를 반환하는거니까.
             {
                 "file_name": image_file,
+                # i. "image_id" ex: 'frankfurt_000000_000294' /21.3.12.15:23.
                 "image_id": "_".join(
                     os.path.splitext(os.path.basename(image_file))[0].split("_")[:3]
                 ),
@@ -106,7 +116,7 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
                 #  난 ~~instanceIds.png 들만 잇으면 되는데 굳이 ~~labelTrainIds.png 는 왜 만들어줬나 했네. Det2 문서가 잘못된건줄 알앗네ㅋ.
                 #  ~~labelTrainIds.png 가 (id값들을 트레이닝용 id값들로 변환해준) semantic seg 어노png에 해당하는거니까. 
                 #  근데..어쨋든 "pan_seg_file_name" 어노png에 모든 정보는 다 들어있는데, 굳이 "sem_seg_file_name" 은 왜 필요..??/21.3.10.18:49
-                # i.21.3.10.23:38) ->뭐지?? 지금 이 함수(load_cityscapes_panoptic)
+                # i.21.3.10.23:38) TODO Q: ->뭐지?? 지금 이 함수(load_cityscapes_panoptic)
                 #  에 대응되는 COCO 함수인 load_coco_panoptic_json 에서는 "sem_seg_file_name" 정보 안넣어주는데???
                 "sem_seg_file_name": sem_label_file, 
                 # i. 지금 label_file 은 COCO panoptic 형식의 어노png 파일인데(cityscapesscripts 코드에서 COCO panoptic 형식으로 변환해줌), 
@@ -117,6 +127,8 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
                 "segments_info": segments_info, 
             }
         )
+
+
     assert len(ret), f"No images found in {image_dir}!"
     assert PathManager.isfile(
         ret[0]["sem_seg_file_name"]

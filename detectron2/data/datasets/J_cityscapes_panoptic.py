@@ -9,7 +9,7 @@
 #
 # i.21.3.11.10:27) 알고있듯이 builtin.py 에서 이것저것 기본적인것들 다 레지스터해주는데
 #  이때 register_all_cityscapes_panoptic 도 레지스터해주는데,
-#  지금 내 플젝에선 내가 따로 호출해서 레지스터 해주자.
+#  지금 내 플젝에선 TODO 내가 따로 호출해서 레지스터 해주자.
 #
 ##############################################################################################################
 
@@ -128,36 +128,67 @@ logger = logging.getLogger(__name__)
 #           굳이그렇게바꿔줄필요없이 그냥 "imp2_45" 이렇게 해줘도 됨.
 #           그리고 "_leftImg8bit.png" 관련된부분들도 수정하고. 예를들어 난 "_leftImg8bit.png" 을 제거해준다거나 할 필요가 없지.
 
-def get_cityscapes_panoptic_files(image_dir, gt_dir, json_info):
+# def get_cityscapes_panoptic_files(image_dir, gt_dir, json_info):
+def get_cocoFormAnnosPerImg_list(image_dir, gt_dir, json_info): # i.21.3.12.18:58) 함수명 get_cityscapes_panoptic_files 에서 내플젝에맞게 이름변경.
+    """
+    # i.21.3.11.23:28) 이 함수의 목적은,
+    #  한 [원본인풋이미지]에 해당하는 [어노png] 와 [어노json에기록돼있는 segments_info] 이렇게 3가지를 뽑아내서 내뱉어주는것.
+    #  image_dir 에 있는 원본 인풋이미지, gt_dir 에 있는 어노png, json_info 의 (각 이미지에 해당하는)annotation의 segments_info
+    #  이렇게 3가지를 튜플로 만들어서(한 이미지당 한 튜플인거지) 리스트로 만들어서 반환함.
+    """
+
+    # i.21.3.12.18:30)
+    # image_dir ex:             "someRootJ/panopticSeg_dentPanoJ/inputOriPano/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+    # gt_dir ex:                "someRootJ/panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+    # json_info ex: loaded from "someRootJ/panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+
+
     files = []
     # scan through the directory
-    cities = PathManager.ls(image_dir)
-    logger.info(f"{len(cities)} cities found in '{image_dir}'.")
-    image_dict = {}
-    for city in cities:
-        city_img_dir = os.path.join(image_dir, city)
-        for basename in PathManager.ls(city_img_dir): # i. basename ex: "frankfurt_000000_000294_leftImg8bit.png"
-            # i. image_file ex: "~~\leftImg8bit\val\frankfurt\frankfurt_000000_000294_leftImg8bit.png" (원 인풋이미지의 경로)
-            image_file = os.path.join(city_img_dir, basename) 
+    # i. image_dir ex: "someRootJ\panopticSeg_dentPanoJ\inputOriPano\train" /21.3.12.16:06.
+    
 
-            suffix = "_leftImg8bit.png"
-            assert basename.endswith(suffix), basename
-            basename = os.path.basename(basename)[: -len(suffix)] # i. basename ex: "frankfurt_000000_000294"
+    # i. 21.3.12.16:10) 내플젝에선 city들 없어서 일케해줄필요없음. 
+    # cities = PathManager.ls(image_dir)
+    # logger.info(f"{len(cities)} cities found in '{image_dir}'.")
+    # image_dict = {}
+    # for city in cities:
+    #     city_img_dir = os.path.join(image_dir, city)
+    #     for basename in PathManager.ls(city_img_dir): # i. basename ex: "frankfurt_000000_000294_leftImg8bit.png"
+    #         # i. image_file ex: "~~\leftImg8bit\val\frankfurt\frankfurt_000000_000294_leftImg8bit.png" (원 인풋이미지의 경로)
+    #         image_file = os.path.join(city_img_dir, basename) 
 
-            image_dict[basename] = image_file # i. image_dict: map 'basename' to 'image_file'(path).
+    #         suffix = "_leftImg8bit.png"
+    #         assert basename.endswith(suffix), basename
+    #         basename = os.path.basename(basename)[: -len(suffix)] # i. basename ex: "frankfurt_000000_000294"
+
+    #         image_dict[basename] = image_file # i. image_dict: map 'basename' to 'image_file'(path).  (여기서 'basename'이 이미지id 랑 같은거임)
+
+
+    # i.21.3.12.16:17) 기존코드와 마찬가지로, 이미지id -> 이미지파일경로 맵핑딕셔너리 만듦.
+    #  원본인풋이미지 파일명에서 이미지id(바로위 기존코드의 'basename'에 해당) 추출.
+    imgId2imgFilePathJ = {}
+    for imgFileJ in os.listdir(image_dir):
+        # i. imgFileJ ex: "imp2_1.jpg"
+        img_id = os.path.splitext(imgFileJ)[0]
+        imgId2imgFilePathJ[img_id] = os.path.join(image_dir, imgFileJ)
+
 
     for ann in json_info["annotations"]:
         # i. ann["image_id"] ex: "frankfurt_000000_000294" 
         #  (cityscapes데이터셋에서 각 annotation의 'image_id' 는 애시당초 위의 'basename' 과 동일하도록 만들어져있음. "frankfurt_000000_000294" 이런식.)
-        image_file = image_dict.get(ann["image_id"], None) 
-        assert image_file is not None, "No image {} found for annotation {}".format(
+        imgFilePath = imgId2imgFilePathJ.get(ann["image_id"], None) # i. <-원래 변수명 image_dict 였는데 내가 imgId2imgFilePathJ 로 바꿨음. 의미전달상.
+        assert imgFilePath is not None, "No image {} found for annotation {}".format(
             ann["image_id"], ann["file_name"]
         )
-        # i. ann["file_name"] ex: "frankfurt_000000_000294_gtFine_panoptic.png" (어노png 파일명)
-        label_file = os.path.join(gt_dir, ann["file_name"]) # i. label_file ex: "~~\gtFine\cityscapes_panoptic_val\frankfurt_000000_000294_gtFine_panoptic.png"
-        segments_info = ann["segments_info"]
+        # i. ann["file_name"] ex: "frankfurt_000000_000294_gtFine_panoptic.png" (어노png 파일명. cityscapes 데이터셋의경우.)
+        # i. ann["file_name"] ex: "imp2_1_panopticAnno.png" (어노png 파일명. 내플젝의경우.)
+        cocoAnnoPngPath = os.path.join(gt_dir, ann["file_name"]) 
+        # i. ->cocoAnnoPngPath ex:                            "~~\gtFine\cityscapes_panoptic_val\frankfurt_000000_000294_gtFine_panoptic.png" (cityscapes 데이터셋의경우.)
+        # i. ->cocoAnnoPngPath ex: "someRootJ\panopticSeg_dentPanoJ\gt\J_cocoformat_panoptic_train\imp2_1_panopticAnno.png" (내플젝의경우.)
+        cocoJson_segments_info = ann["segments_info"]
 
-        files.append((image_file, label_file, segments_info))
+        files.append((imgFilePath, cocoAnnoPngPath, cocoJson_segments_info))
 
     assert len(files), "No images found in {}".format(image_dir)
     assert PathManager.isfile(files[0][0]), files[0][0]
@@ -165,14 +196,19 @@ def get_cityscapes_panoptic_files(image_dir, gt_dir, json_info):
     return files
 
 
+
+
 def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     """
     Args:
-        image_dir (str): path to the raw dataset. e.g., "~/cityscapes/leftImg8bit/train".
+
+        image_dir (str): path to the raw dataset. e.g., 
+            "~/cityscapes/leftImg8bit/train".
         gt_dir (str): path to the raw annotations. e.g.,
             "~/cityscapes/gtFine/cityscapes_panoptic_train".
         gt_json (str): path to the json file. e.g.,
             "~/cityscapes/gtFine/cityscapes_panoptic_train.json".
+
         meta (dict): dictionary containing "thing_dataset_id_to_contiguous_id"
             and "stuff_dataset_id_to_contiguous_id" to map category ids to
             contiguous ids for training.
@@ -181,6 +217,12 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
         list[dict]: a list of dicts in Detectron2 standard format. (See
         `Using Custom Datasets </tutorials/datasets.html>`_ )
     """
+
+    # i.21.3.12.18:30)
+    # image_dir ex: "someRootJ/panopticSeg_dentPanoJ/inputOriPano/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
+    # gt_dir ex:    "someRootJ/panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
+    # gt_json ex:   "someRootJ/panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
+
 
     def _convert_category_id(segment_info, meta):
         if segment_info["category_id"] in meta["thing_dataset_id_to_contiguous_id"]:
@@ -195,41 +237,51 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
 
     assert os.path.exists(
         gt_json
-    ), "Please run `python cityscapesscripts/preparation/createPanopticImgs.py` to generate label files."  # noqa
+    ), "j) Please run `cityscapesscripts_mvdeltGithub\cityscapesscripts\preparation\J_createPanopticImgs.py` to generate label files."  # noqa
+
     with open(gt_json) as f:
         json_info = json.load(f)
+
+    
     # i. files: [(imgFilePath, labelPngFilePath, segments_info), (~~), ...] /21.3.10.18:34.
     #  files 의 각 튜플은 하나의 이미지에 대응됨.
-    files = get_cityscapes_panoptic_files(image_dir, gt_dir, json_info) 
+    files = get_cocoFormAnnosPerImg_list(image_dir, gt_dir, json_info) 
     ret = []
-    for image_file, label_file, segments_info in files: # i. 각각 (하나의 이미지에 대응되는) 원본이미지파일경로, 어노png경로, segments_info(리스트). /21.3.10.18:34.
-        # i. sem_label_file ex: "frankfurt_000000_000294_gtFine_labelTrainIds.png" /21.3.10.18:44
+    for imgFilePath, cocoAnnoPngPath, segments_info in files: # i. 각각 (하나의 이미지에 대응되는) 원본이미지파일경로, 어노png경로, segments_info(리스트). /21.3.10.18:34.
+        # i. imgFilePath ex: "someRootJ\panopticSeg_dentPanoJ\inputOriPano\train\imp2_1.jpg" /21.3.12.15:36.
+        # i. cocoAnnoPngPath ex: "someRootJ\panopticSeg_dentPanoJ\gt\J_cocoformat_panoptic_train\imp2_1_panopticAnno.png" /21.3.12.15:37.
+              
+        # i. sem_label_file ex: "someRootJ\panopticSeg_dentPanoJ\gt\train\imp2_1_labelTrainIds.png"
         sem_label_file = (
-            image_file.replace("leftImg8bit", "gtFine").split(".")[0] + "_labelTrainIds.png"  
+            imgFilePath.replace("inputOriPano", "gt").split(".")[0] + "_labelTrainIds.png"  
         )
         segments_info = [_convert_category_id(x, meta) for x in segments_info]
+
         ret.append(
+            # i.21.3.12.8:19) 결국 요게 핵심. 
+            #  지금 이 함수(load_cityscapes_panoptic)의 목적이 이 딕셔너리들의 리스트를 반환하는거니까.
             {
-                "file_name": image_file,
-                "image_id": "_".join(
-                    os.path.splitext(os.path.basename(image_file))[0].split("_")[:3]
-                ),
+                "file_name": imgFilePath,
+                # i. "image_id" ex: 'imp2_1' /21.3.12.15:23.
+                "image_id": os.path.splitext(os.path.basename(imgFilePath))[0],
                 # i. 아. 요 "sem_seg_file_name" 이 필요해서 Det2 문서 'Use Builtin Datasets'에서 cityscapes 데이터셋 준비해주는부분에서
                 #  createTrainIdLabelImgs.py 를 실행해서 ~~labelTrainIds.png 들을 만들어줬던거구나. 
                 #  난 ~~instanceIds.png 들만 잇으면 되는데 굳이 ~~labelTrainIds.png 는 왜 만들어줬나 했네. Det2 문서가 잘못된건줄 알앗네ㅋ.
                 #  ~~labelTrainIds.png 가 (id값들을 트레이닝용 id값들로 변환해준) semantic seg 어노png에 해당하는거니까. 
                 #  근데..어쨋든 "pan_seg_file_name" 어노png에 모든 정보는 다 들어있는데, 굳이 "sem_seg_file_name" 은 왜 필요..??/21.3.10.18:49
-                # i.21.3.10.23:38) ->뭐지?? 지금 이 함수(load_cityscapes_panoptic)
+                # i.21.3.10.23:38) TODO Q: ->뭐지?? 지금 이 함수(load_cityscapes_panoptic)
                 #  에 대응되는 COCO 함수인 load_coco_panoptic_json 에서는 "sem_seg_file_name" 정보 안넣어주는데???
                 "sem_seg_file_name": sem_label_file, 
-                # i. 지금 label_file 은 COCO panoptic 형식의 어노png 파일인데(cityscapesscripts 코드에서 COCO panoptic 형식으로 변환해줌), 
+                # i. 지금 cocoAnnoPngPath 은 COCO panoptic 형식의 어노png 파일인데(cityscapesscripts 코드에서 COCO panoptic 형식으로 변환해줌), 
                 #  Det2 형식의 "pan_seg_file_name"도 어차피 COCO panoptic 과 동일한 형식의 어노png(id값을 256진법으로 RGB로 변환한거. 
                 #  Det2 문서의 "pan_seg_file_name" 설명에 나오는 panopticapi.utils.id2rgb 함수가 해주는게 그거임.)를 받기때문에,
                 #  아래처럼 그냥 그대로 할당해줘도 됨./21.3.10.19:56.
-                "pan_seg_file_name": label_file, 
+                "pan_seg_file_name": cocoAnnoPngPath, 
                 "segments_info": segments_info, 
             }
         )
+
+
     assert len(ret), f"No images found in {image_dir}!"
     assert PathManager.isfile(
         ret[0]["sem_seg_file_name"]
@@ -237,6 +289,7 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     assert PathManager.isfile(
         ret[0]["pan_seg_file_name"]
     ), "Please generate panoptic annotation with python cityscapesscripts/preparation/createPanopticImgs.py"  # noqa
+
     return ret
 
 
@@ -340,9 +393,9 @@ def register_all_cityscapes_panoptic(root):
             image_root=image_dir, # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
             panoptic_json=gt_json, # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
             # i. COCO형식으로 변환하기 전의, cityscapes형식의 어노png, 어노json (~~instanceIds.png, ~~polygons.json 등) 들이 있는 디렉토리./21.3.10.12:08.
-            gt_dir=gt_dir.replace("cityscapes_panoptic_", ""), 
-            evaluator_type="cityscapes_panoptic_seg",
-            ignore_label=255,
+            gt_dir=gt_dir.replace("cityscapes_panoptic_", ""), ################### 내플젝에맞게 수정필요.
+            evaluator_type="cityscapes_panoptic_seg", ################### 내플젝에맞게 수정필요.
+            ignore_label=255, ################### 내플젝에맞게 수정필요.->현재 내플젝에선 무시하는 카테고리가 없는상태라 이대로 냅둬도 상관은 없을듯.
             label_divisor=1000,
             **meta,
         )
