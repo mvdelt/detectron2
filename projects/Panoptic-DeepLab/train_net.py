@@ -188,10 +188,12 @@ class Trainer(DefaultTrainer):
         # we can use the saved checkpoint to debug.
         ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
         # i. ->이부분 코멘트아웃./21.2.13.15:15.
-        # i.21.3.13.0:36) ->다시 복구. 이밸류에이션 따로 해주면될줄알앗는데, 이거(hooks.EvalHook 관련) 생각보다 좀 복잡하네?
+        # i.21.3.13.0:36) ->다시 복구. 
+        #  이밸류에이션 따로 해주면될줄알앗는데, 이거(hooks.EvalHook 관련) 생각보다 좀 복잡하네?
         #  test 함수 돌리는거 자체는 뭐 걍 하면 되는것같은데.. 왜케복잡하지.. 
         #  암튼 일단 다시 살려서 이밸류에이션 되게 해보자. 내플젝 이밸류에이션 되나 보기도 해야하니까.
-         
+        #  (사실 이렇게 살려놓을거면 DefaultTrainer 의 build_hooks 함수랑 똑같을테니
+        #   이렇게 overriding 할필요 없지만, 아무튼 일단은.)
 
         if comm.is_main_process():
             # Here the default print/log frequency of each writer is used.
