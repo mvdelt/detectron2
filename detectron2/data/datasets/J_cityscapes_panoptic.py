@@ -198,7 +198,8 @@ def get_cocoFormAnnosPerImg_list(image_dir, gt_dir, json_info): # i.21.3.12.18:5
 
 
 
-def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
+# def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
+def load_panopticSeg_dentPanoJ(image_dir, gt_dir, gt_json, meta): # i.21.3.12.20:37) 내플젝에맞게 함수명 변경함.
     """
     Args:
 
@@ -245,7 +246,7 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     
     # i. files: [(imgFilePath, labelPngFilePath, segments_info), (~~), ...] /21.3.10.18:34.
     #  files 의 각 튜플은 하나의 이미지에 대응됨.
-    files = get_cocoFormAnnosPerImg_list(image_dir, gt_dir, json_info) 
+    files = get_cocoFormAnnosPerImg_list(image_dir, gt_dir, json_info) # i.21.3.12.18:58) <-함수명 get_cityscapes_panoptic_files 에서 내플젝에맞게 이름변경.
     ret = []
     for imgFilePath, cocoAnnoPngPath, segments_info in files: # i. 각각 (하나의 이미지에 대응되는) 원본이미지파일경로, 어노png경로, segments_info(리스트). /21.3.10.18:34.
         # i. imgFilePath ex: "someRootJ\panopticSeg_dentPanoJ\inputOriPano\train\imp2_1.jpg" /21.3.12.15:36.
@@ -311,7 +312,10 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
 # i.21.3.11.12:57) TODO: 지금 여기 하다말앗음!! 내플젝에맞게 폴더구조 변경해주고있음. 폴더명 바꿔주고있고.
 #  점점 cityscapes 데이터셋 폴더구조와 비슷해지네ㅋ.
 #  띄어쓰기해놓은곳 우측부분들이 아직 수정 못해준것들임.
-_RAW_CITYSCAPES_PANOPTIC_SPLITS_J = {
+# i.21.3.13.0:32) train 관련해선 뭐 대충 일케하면 될듯한데, val 관련해서는 아직 안만들어준 상태임.
+#
+# i.21.3.12.20:41) 변수명 기존 _RAW_CITYSCAPES_PANOPTIC_SPLITS 에서 내플젝에맞게 변경함.
+_RAW_PANOPTICSEG_DENTPANO_SPLITS_J = {
     "panopticSeg_dentPanoJ_train": (
         "panopticSeg_dentPanoJ/inputOriPano/train", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
         "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
@@ -380,22 +384,29 @@ def register_all_cityscapes_panoptic(root):
     meta["thing_dataset_id_to_contiguous_id"] = thing_dataset_id_to_contiguous_id
     meta["stuff_dataset_id_to_contiguous_id"] = stuff_dataset_id_to_contiguous_id
 
-    for key, (image_dir, gt_dir, gt_json) in _RAW_CITYSCAPES_PANOPTIC_SPLITS_J.items():
+    for key, (image_dir, gt_dir, gt_json) in _RAW_PANOPTICSEG_DENTPANO_SPLITS_J.items(): # i.21.3.12.20:41) 변수명 기존 _RAW_CITYSCAPES_PANOPTIC_SPLITS 에서 내플젝에맞게 변경함.
         image_dir = os.path.join(root, image_dir)
         gt_dir = os.path.join(root, gt_dir)
         gt_json = os.path.join(root, gt_json)
 
         DatasetCatalog.register(
-            key, lambda x=image_dir, y=gt_dir, z=gt_json: load_cityscapes_panoptic(x, y, z, meta)
+            # key, lambda x=image_dir, y=gt_dir, z=gt_json: load_cityscapes_panoptic(x, y, z, meta)
+            key, lambda x=image_dir, y=gt_dir, z=gt_json: load_panopticSeg_dentPanoJ(x, y, z, meta) # i.21.3.12.20:37) 내플젝에맞게 함수명 변경함.
         )
         MetadataCatalog.get(key).set(
             panoptic_root=gt_dir, # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
             image_root=image_dir, # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
             panoptic_json=gt_json, # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
             # i. COCO형식으로 변환하기 전의, cityscapes형식의 어노png, 어노json (~~instanceIds.png, ~~polygons.json 등) 들이 있는 디렉토리./21.3.10.12:08.
-            gt_dir=gt_dir.replace("cityscapes_panoptic_", ""), ################### 내플젝에맞게 수정필요.
-            evaluator_type="cityscapes_panoptic_seg", ################### 내플젝에맞게 수정필요.
-            ignore_label=255, ################### 내플젝에맞게 수정필요.->현재 내플젝에선 무시하는 카테고리가 없는상태라 이대로 냅둬도 상관은 없을듯.
+            gt_dir=gt_dir.replace("J_cocoformat_panoptic_", ""), # i. 내플젝에맞게 수정함. /21.3.12.20:56. 
+            ################### 내플젝에맞게 수정필요.
+            # i.21.3.12.23:51) ->이밸류에이터 관련 코드들 좀 살펴봣는데, 일단 걍 이대로("cityscapes_panoptic_seg"로) 냅둬도될듯.. 코드 좀 더 뜯어봐야함!!
+            #  대신, Det2 인스톨시에 내가수정한거 적용되게 해서, 내플젝에맞게 변경한 labels.py 가 적용되어야할듯!!!
+            #  그 외에 또 고려해줄거 잇으려나..?
+            evaluator_type="cityscapes_panoptic_seg", 
+            ################### 내플젝에맞게 수정필요.
+            # i. ->현재 내플젝에선 무시하는 카테고리가 없는상태라 이대로(255로) 냅둬도 상관은 없을듯.
+            ignore_label=255, 
             label_divisor=1000,
             **meta,
         )

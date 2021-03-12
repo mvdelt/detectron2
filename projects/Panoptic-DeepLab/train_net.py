@@ -141,7 +141,7 @@ class Trainer(DefaultTrainer):
 
 
     # i.21.2.13.15:11) 트레이닝끝나고 이밸류에이션 안하게 해주려고(이밸류에이션 시간 넘 오래걸려서),
-    #  DefaultPredictor 의 build_hooks 함수 override 한다음 훅 리스트에 hooks.EvalHook 추가하는부분 삭제.
+    #  DefaultTrainer 의 build_hooks 함수 override 한다음 훅 리스트에 hooks.EvalHook 추가하는부분 삭제.
     def build_hooks(self):
         """
         Build a list of default hooks, including timing, evaluation,
@@ -186,7 +186,12 @@ class Trainer(DefaultTrainer):
 
         # Do evaluation after checkpointer, because then if it fails,
         # we can use the saved checkpoint to debug.
-        # ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) # i.이부분 코멘트아웃./21.2.13.15:15.
+        ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
+        # i. ->이부분 코멘트아웃./21.2.13.15:15.
+        # i.21.3.13.0:36) ->다시 복구. 이밸류에이션 따로 해주면될줄알앗는데, 이거(hooks.EvalHook 관련) 생각보다 좀 복잡하네?
+        #  test 함수 돌리는거 자체는 뭐 걍 하면 되는것같은데.. 왜케복잡하지.. 
+        #  암튼 일단 다시 살려서 이밸류에이션 되게 해보자. 내플젝 이밸류에이션 되나 보기도 해야하니까.
+         
 
         if comm.is_main_process():
             # Here the default print/log frequency of each writer is used.
