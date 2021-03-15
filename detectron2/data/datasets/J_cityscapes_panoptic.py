@@ -24,6 +24,8 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 # from detectron2.data.datasets.builtin_meta import CITYSCAPES_CATEGORIES    # i.21.3.11.00:00) ->이거쓰면 안됨. 내플젝이라.
 from detectron2.utils.file_io import PathManager
 
+from collections import namedtuple
+
 """
 This file contains functions to register the Cityscapes panoptic dataset to the DatasetCatalog.
 """
