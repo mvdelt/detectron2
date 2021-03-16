@@ -88,7 +88,6 @@ if __name__ == "__main__":
     from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic
     dataRootJ = "/content/datasetsJ" # i. 코랩컴에서의 경로임.
     register_all_cityscapes_panoptic(dataRootJ)
-    # 그리고 이제 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
     ##########################################################################################################
 
 
