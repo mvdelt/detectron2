@@ -13,7 +13,17 @@ import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
-from detectron2.data import MetadataCatalog, build_detection_train_loader
+from detectron2.data import MetadataCatalog, build_detection_train_loader,    DatasetCatalog 
+# i.21.3.16.12:32) ->데이타셋레지스터도 여기(지금 이 train_net.py)서 해주려고 DatasetCatalog 도 임포트했음.
+#  코랩에서 from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic 으로
+#  내가수정해준 register_all_cityscapes_panoptic 함수를 임포트해서 데이터셋 레지스터해줘도, 
+#  코랩에서 그 이후 셀에서 !python train_net.py 실행시키면 데이터셋이 레지스터 안된걸로 나옴.
+#  즉, !python train_net.py 로 실행시킨거는 별개인거지. 
+#  코랩에서 !python train_net.py 를 해준다는거는, 쉽게말해 코랩컴의 커맨드창에서 python train_net.py 를 실행시켜주는셈이니까.
+#  즉, 코랩에서 셀들을 돌리는거는 코랩컴에서 어떠한 파이썬 코드를 실행하고있는건데, 추가적으로 커맨트창을 따로 열어서 python train_net.py 를 실행시켜주면,
+#  이거는 실행하던 파이썬코드랑은 별개로 실행되나봄. 너무 당연한건가??!!!
+#  음 그러니까 내생각엔, 아예 다른 프로세스에서 돌아가는거라고 봐야할듯. 예를들어 train_net.py 를 두번 실행시키면, 각각 별도의 프로세스에서 동작할거잖아. 뭐 그런비슷한거지.
+
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, launch
 from detectron2.evaluation import (
     CityscapesInstanceEvaluator,
@@ -225,6 +235,14 @@ def main(args):
         )
         res = Trainer.test(cfg, model)
         return res
+
+    # i.21.3.16.12:53) 이쯤에서 내 커스텀데이타셋 레지스터 해줘보자!! ############################################
+    #  (코랩의 셀에서 레지스터해주면 적용안되는이유 저위에 적어놨음)
+    from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic
+    dataRootJ = "/content/datasetsJ" # i. 코랩컴에서의 경로임.
+    register_all_cityscapes_panoptic(dataRootJ)
+    # 그리고 이제 바로 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
+    ##########################################################################################################
 
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)
