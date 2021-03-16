@@ -229,6 +229,15 @@ def setup(args):
 def main(args):
     cfg = setup(args)
 
+    # i.21.3.16.12:53) 이쯤에서 내 커스텀데이타셋 레지스터 해줘보자!! ##########################################
+    #  (코랩의 셀에서 레지스터해주면 적용안되는이유 저위에 적어놨음)
+    #  TODO: 이 코드부분 위치 옮겨야할수도 있음!! 아직 꼼꼼히 안살펴봄!!
+    from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic
+    dataRootJ = "/content/datasetsJ" # i. 코랩컴에서의 경로임.
+    register_all_cityscapes_panoptic(dataRootJ)
+    # 그리고 이제 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
+    ##########################################################################################################
+
     if args.eval_only:
         model = Trainer.build_model(cfg)
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
@@ -237,13 +246,6 @@ def main(args):
         res = Trainer.test(cfg, model)
         return res
 
-    # i.21.3.16.12:53) 이쯤에서 내 커스텀데이타셋 레지스터 해줘보자!! ############################################
-    #  (코랩의 셀에서 레지스터해주면 적용안되는이유 저위에 적어놨음)
-    from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic
-    dataRootJ = "/content/datasetsJ" # i. 코랩컴에서의 경로임.
-    register_all_cityscapes_panoptic(dataRootJ)
-    # 그리고 이제 바로 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
-    ##########################################################################################################
 
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)

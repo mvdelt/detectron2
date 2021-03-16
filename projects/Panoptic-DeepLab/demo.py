@@ -79,6 +79,21 @@ def get_parser():
 
 
 if __name__ == "__main__":
+
+
+
+    # i.21.3.16.16:50) 이쯤에서 내 커스텀데이타셋 레지스터 해줘보자!! ##########################################
+    #  일단 걍 대충 여기서 레지스터해줘봄.
+    #  TODO: 이 코드부분 위치 옮겨야할수도 있음!! 아직 꼼꼼히 안살펴봄!!
+    from detectron2.data.datasets.J_cityscapes_panoptic import register_all_cityscapes_panoptic
+    dataRootJ = "/content/datasetsJ" # i. 코랩컴에서의 경로임.
+    register_all_cityscapes_panoptic(dataRootJ)
+    # 그리고 이제 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
+    ##########################################################################################################
+
+
+
+
     mp.set_start_method("spawn", force=True)
     args = get_parser().parse_args()
     setup_logger(name="fvcore")
