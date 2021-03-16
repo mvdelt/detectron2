@@ -194,9 +194,9 @@ class Trainer(DefaultTrainer):
             self._last_eval_results = self.test(self.cfg, self.model)
             return self._last_eval_results
 
-        # Do evaluation after checkpointer, because then if it fails,
-        # we can use the saved checkpoint to debug.
-        ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
+        # # Do evaluation after checkpointer, because then if it fails,
+        # # we can use the saved checkpoint to debug.
+        # ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
         # i. ->이부분 코멘트아웃./21.2.13.15:15.
         # i.21.3.13.0:36) ->다시 복구. 
         #  이밸류에이션 따로 해주면될줄알앗는데, 이거(hooks.EvalHook 관련) 생각보다 좀 복잡하네?
