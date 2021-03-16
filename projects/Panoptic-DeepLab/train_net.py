@@ -204,6 +204,7 @@ class Trainer(DefaultTrainer):
         #  암튼 일단 다시 살려서 이밸류에이션 되게 해보자. 내플젝 이밸류에이션 되나 보기도 해야하니까.
         #  (사실 이렇게 살려놓을거면 DefaultTrainer 의 build_hooks 함수랑 똑같을테니
         #   이렇게 overriding 할필요 없지만, 아무튼 일단은.)
+        # i.21.3.16.14:56) 다시 코멘트아웃. 지금 내 커스텀 데이터셋에 val 준비안돼잇어서.
 
         if comm.is_main_process():
             # Here the default print/log frequency of each writer is used.
