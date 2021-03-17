@@ -113,6 +113,11 @@ Label = namedtuple( 'Label' , [
 # ]
 
 # i.21.3.17.1:04) Rt, Lt 구분 없앤걸로 수정.(걍 귀찮아서 Det2 내장 좌우플립 데이터오그멘테이션 사용해주기 위해서 sinus 랑 canal 의 좌우구분 없애버림.)
+# i.21.3.17.17:38) TODO: sinus, canal 의 hasInstances 를 True 로 해줘야하나???
+# i.21.3.17.19:00) TODO: unlabeled_Label 의 trainId 를 255로 해주는게 나은가??? 그리고나서 모든걸 trainId 기준으로 준비해주고..??
+#  (난 지금은 id랑 trainId 가 동일해서 그냥 크게 구분없이 해줫을거임. )
+#    아니, 걍 unlabeled_Label 자체를 걍 없애버리고 총 클래스수를 8개가 아닌 7개로 해주면 될것같은데?? 
+#  panoptic deeplab 에서도 coco 는 133개, cityscapes 는 19개로 해줫는데, 모두 unlabeled 는 빼고 실제로 의미잇는 클래스들 갯수만 센거임.
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
     Label(  'unlabeled_Label'      ,  0 ,        0 , 'voidJ'           , 0       , False        , False        , (  0,  0,  0) ),

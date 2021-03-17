@@ -2,3 +2,6 @@ _BASE_: panoptic_deeplab_R_52_os16_mg124_poly_90k_bs32_crop_512_1024_dsconv.yaml
 DATASETS:
   TRAIN: ("panopticSeg_dentPanoJ_train",)
   TEST: ("panopticSeg_dentPanoJ_val",)
+MODEL:
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 8
