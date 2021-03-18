@@ -136,16 +136,43 @@ Label = namedtuple( 'Label' , [
 #  
 #    그리고, 위에적은대로, unlabeled_Label 자체를 걍 없애버리고 총 클래스수를 8개가 아닌 7개로 바꿔주려함.
 #  그리고 Label들 순서 바꿔줫고, maxilla 색깔 붉은주황색계열로 바꿔줘봄.
+# labels = [
+#     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+#     Label(  'mandible'             ,  0 ,        0 , 'boneJ'           , 0       , False        , False        , (185,181,247) ),
+#     Label(  'maxilla'              ,  1 ,        1 , 'boneJ'           , 0       , True         , False        , (255, 85, 79) ),
+#     Label(  'sinus'                ,  2 ,        2 , 'sinusJ'          , 1       , True         , False        , (  0,  0,255) ),
+#     Label(  'canal'                ,  3 ,        3 , 'canalJ'          , 2       , True         , False        , ( 76, 68,212) ),
+#     Label(  't_normal'             ,  4 ,        4 , 'toothJ'          , 3       , True         , False        , ( 66,158, 27) ),
+#     Label(  't_tx'                 ,  5 ,        5 , 'toothJ'          , 3       , True         , False        , ( 88,214, 34) ),
+#     Label(  'impl'                 ,  6 ,        6 , 'toothJ'          , 3       , True         , False        , (116,255, 56) ),
+# ]
+
+# i.21.3.18.9:18) 위처럼 mandible 의 id를 0으로 해주니, ~~instanceIds.png 에 mandible 의 id값이 0으로 기록되는데,
+#  J_createPanopticImgs.py 에서 ~~instanceIds.png 로부터 coco어노png 만들어줄때 백그라운드 픽셀들의 값을 [0,0,0]으로 해주는데
+#  mandible 의 id 값이 0이라서 얘도 픽셀들 값이 [0,0,0] 으로 변환돼버림. 그래서 mandible이랑 백그라운드 둘다 [0,0,0]이돼서
+#  트레이닝 결과 보면 mandible과 백그라운드 전부 다 mandible 로 프레딕션하게된거임.
+#    -> 즉, 의미있는 클래스들은 id값이 0이 아니어야함(지금상태의 코드들을 이용해준다면). 
+#    -> 그래서 그냥 unlabeled_Label 을 다시사용해주되,
+#       Det2 mvdelt깃헙버전의 J_cityscapes_panoptic.py(데이터셋레지스터해주는파일(바로 지금 이 파일)) 에서 CITYSCAPES_CATEGORIES_J **에서는 unlabeled_Label 을 없애기로(바로 지금 이부분).**
+#       (안사용하고 걍 mandible부터 id 1, trainId 0부터 시작하게해도 되긴 하겠지만)
+#       (참고로 Det2 의 cityscapes_panoptic.py 에서는 의미있는 클래스들의 목록만 사용하고, 
+#        얘네들의 trainId 들은 0부터 연속적으로(0,1,2,...)돼있기때문에 trainId 를 "contiguous id" 로 사용해줌. 
+#        즉, Det2 형식에 넣어주는 각 segment_info 의 'category_id' 값은 trainId 이고 요게 연속적으로 0,1,2,.. 일케되는거임)
+#  뭐 결국 바로위의 lables 처럼 해놔도 작동에 문제는 없을듯하네. 지금 이파일에서의 labels 가 중요한게 아니고 cityscapesscripts 의 labels 가 중요한거니까.
+#  (지금 이 파일에서는 각 Label 의 id 값은 사용하지 않는듯.)
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-    Label(  'mandible'             ,  0 ,        0 , 'boneJ'           , 0       , False        , False        , (185,181,247) ),
-    Label(  'maxilla'              ,  1 ,        1 , 'boneJ'           , 0       , True         , False        , (255, 85, 79) ),
-    Label(  'sinus'                ,  2 ,        2 , 'sinusJ'          , 1       , True         , False        , (  0,  0,255) ),
-    Label(  'canal'                ,  3 ,        3 , 'canalJ'          , 2       , True         , False        , ( 76, 68,212) ),
-    Label(  't_normal'             ,  4 ,        4 , 'toothJ'          , 3       , True         , False        , ( 66,158, 27) ),
-    Label(  't_tx'                 ,  5 ,        5 , 'toothJ'          , 3       , True         , False        , ( 88,214, 34) ),
-    Label(  'impl'                 ,  6 ,        6 , 'toothJ'          , 3       , True         , False        , (116,255, 56) ),
+  # Label(  'unlabeled_Label'      ,  0 ,      255 , 'voidJ'           , 0       , False        , True         , (  0,  0,  0) ),  # i. <-없애줌!!/21.3.18.9:29.
+    Label(  'mandible'             ,  1 ,        0 , 'boneJ'           , 1       , False        , False        , (185,181,247) ),
+    Label(  'maxilla'              ,  2 ,        1 , 'boneJ'           , 1       , True         , False        , (255, 85, 79) ),  # i. <-상악,하악 hasInstances 다르게해서 비교해줘보려고.
+    Label(  'sinus'                ,  3 ,        2 , 'sinusJ'          , 2       , True         , False        , (  0,  0,255) ),
+    Label(  'canal'                ,  4 ,        3 , 'canalJ'          , 3       , True         , False        , ( 76, 68,212) ),
+    Label(  't_normal'             ,  5 ,        4 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
+    Label(  't_tx'                 ,  6 ,        5 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
+    Label(  'impl'                 ,  7 ,        6 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
 ]
+
+
 
 
 # i.21.3.10.23:59) 기존 CITYSCAPES_CATEGORIES 의 형태로 변경해줌.
@@ -264,6 +291,9 @@ def load_panopticSeg_dentPanoJ(image_dir, gt_dir, gt_json, meta): # i.21.3.12.20
 
 
     def _convert_category_id(segment_info, meta):
+        # i.21.3.18.1:35) 지금 이 함수는 cityscapesscripts 의 createPanopticImgs.py 의 convert2panoptic 함수에서 
+        #  useTrainId=False 로 적용했을때(segment_info 의 "category_id" 가 카테고리의 trainId 가 아닌 그냥id로 셋팅됨)를 가정하고 작동하는거네. 
+        #  그래서결국, segment_info["category_id"] 를 카테고리의 그냥id에서 trainId 로 바꿔주는거임.
         if segment_info["category_id"] in meta["thing_dataset_id_to_contiguous_id"]:
             segment_info["category_id"] = meta["thing_dataset_id_to_contiguous_id"][
                 segment_info["category_id"]
@@ -316,6 +346,17 @@ def load_panopticSeg_dentPanoJ(image_dir, gt_dir, gt_json, meta): # i.21.3.12.20
                 #  Det2 문서의 "pan_seg_file_name" 설명에 나오는 panopticapi.utils.id2rgb 함수가 해주는게 그거임.)를 받기때문에,
                 #  아래처럼 그냥 그대로 할당해줘도 됨./21.3.10.19:56.
                 "pan_seg_file_name": cocoAnnoPngPath, 
+                # i.21.3.18.9:38) 
+                #  (cityscapesscripts 의 createPanopticImgs.py 의 conver2panoptic 함수에서 만들어준) coco어노json 파일 (지금내치과파노플젝의경우 J_cocoformat_panoptic_train.json 로 이름붙였지)
+                #  의 segments_info 랑 똑같은데, 다만 각 segment_info 의 'category_id' 값만 trainId 로 바꿔준거임.(trainId 값은 CITYSCAPES_CATEGORIES_J 에서 가져온거고.)
+                #  바로 이 trainId 값들이 0,1,2,... 이렇게 "contiguous(연속적)" 하게 되어있고.
+                #  아마도 Det2 에서는 바로 이 contiguous 한 숫자들(각 segment_info 의 'category_id'. trainId값으로 셋팅해준.)을 가지고 클래스(카테고리)를 구분하는듯함.
+                #  어노png 의 각 픽셀은 trainId 값이 아닌 그냥id 값이고(256진법으로 RGB로 변환된), 각 segment_info 의 'id' 의 값이 바로 이 id값임(256진법 말고 그냥 10진법으로 된 숫자).
+                #  따라서 각 segment_info 의 'id' 와 'category_id' 정보를 통해서 어노png 의 id 값들을 category_id 값들로 변환해줄수 있겠네.
+                #  즉, 정리하면,
+                #  id값은 뭐가됏든 상관없고 걍 각 인스턴스들마다 id가 달라서 구분만 되면 되고, (id 값은 어노png 에 256진법 RGB로 저장돼잇고 segment_info 의 'id' 에도 10진법 숫자로 저장돼있고.)
+                #  segment_info 의 'category_id' 만 contiguous 하게 0,1,2,... 이렇게 되면 되는듯함.
+                #  그러면 Det2 형식이 완성되는거고, Det2 가 이제 내부적으로 모델이 사용하는 형식으로 변환해서 트레이닝 하겠지.
                 "segments_info": segments_info, 
             }
         )

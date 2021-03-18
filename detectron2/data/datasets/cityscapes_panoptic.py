@@ -70,6 +70,9 @@ def load_cityscapes_panoptic(image_dir, gt_dir, gt_json, meta):
     """
 
     def _convert_category_id(segment_info, meta):
+        # i.21.3.18.1:35) 지금 이 함수는 cityscapesscripts 의 createPanopticImgs.py 의 convert2panoptic 함수에서 
+        #  useTrainId=False 로 적용했을때(segment_info 의 "category_id" 가 카테고리의 trainId 가 아닌 그냥id로 셋팅됨)를 가정하고 작동하는거네. 
+        #  그래서결국, segment_info["category_id"] 를 카테고리의 그냥id에서 trainId 로 바꿔주는거임.
         if segment_info["category_id"] in meta["thing_dataset_id_to_contiguous_id"]:
             segment_info["category_id"] = meta["thing_dataset_id_to_contiguous_id"][
                 segment_info["category_id"]
