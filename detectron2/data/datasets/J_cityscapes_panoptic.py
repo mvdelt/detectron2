@@ -164,7 +164,7 @@ labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
   # Label(  'unlabeled_Label'      ,  0 ,      255 , 'voidJ'           , 0       , False        , True         , (  0,  0,  0) ),  # i. <-없애줌!!/21.3.18.9:29.
     Label(  'mandible'             ,  1 ,        0 , 'boneJ'           , 1       , False        , False        , (185,181,247) ),
-    Label(  'maxilla'              ,  2 ,        1 , 'boneJ'           , 1       , True         , False        , (255, 85, 79) ),  # i. <-상악,하악 hasInstances 다르게해서 비교해줘보려고.
+    Label(  'maxilla'              ,  2 ,        1 , 'boneJ'           , 1       , True         , False        , (255,  0,  0) ),  # i. <-상악,하악 hasInstances 다르게해서 비교해줘보려고.
     Label(  'sinus'                ,  3 ,        2 , 'sinusJ'          , 2       , True         , False        , (  0,  0,255) ),
     Label(  'canal'                ,  4 ,        3 , 'canalJ'          , 3       , True         , False        , ( 76, 68,212) ),
     Label(  't_normal'             ,  5 ,        4 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
