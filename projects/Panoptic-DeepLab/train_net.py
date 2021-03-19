@@ -197,14 +197,15 @@ class Trainer(DefaultTrainer):
         # # Do evaluation after checkpointer, because then if it fails,
         # # we can use the saved checkpoint to debug.
         # ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
-        # i. ->이부분 코멘트아웃./21.2.13.15:15.
+        # i.21.2.13.15:15) ->이부분 코멘트아웃.
         # i.21.3.13.0:36) ->다시 복구. 
         #  이밸류에이션 따로 해주면될줄알앗는데, 이거(hooks.EvalHook 관련) 생각보다 좀 복잡하네?
         #  test 함수 돌리는거 자체는 뭐 걍 하면 되는것같은데.. 왜케복잡하지.. 
         #  암튼 일단 다시 살려서 이밸류에이션 되게 해보자. 내플젝 이밸류에이션 되나 보기도 해야하니까.
         #  (사실 이렇게 살려놓을거면 DefaultTrainer 의 build_hooks 함수랑 똑같을테니
         #   이렇게 overriding 할필요 없지만, 아무튼 일단은.)
-        # i.21.3.16.14:56) 다시 코멘트아웃. 지금 내 커스텀 데이터셋에 val 준비안돼잇어서.
+        # i.21.3.16.14:56) ->다시 코멘트아웃. 지금 내 커스텀 데이터셋에 val 준비안돼잇어서.
+        # i.21.3.19.13:16) -> hooks.EvalHook 관련 EventStorage 등 조사완료. 다시보니 뭐 그닥 복잡할것도 없네.
 
         if comm.is_main_process():
             # Here the default print/log frequency of each writer is used.
@@ -229,6 +230,7 @@ def setup(args):
 def main(args):
     cfg = setup(args)
 
+
     # i.21.3.16.12:53) 이쯤에서 내 커스텀데이타셋 레지스터 해줘보자!! ##########################################
     #  (코랩의 셀에서 레지스터해주면 적용안되는이유 저위에 적어놨음)
     #  TODO: 이 코드부분 위치 옮겨야할수도 있음!! 아직 꼼꼼히 안살펴봄!!
@@ -238,8 +240,15 @@ def main(args):
     # 그리고 이제 밑에서 trainer 객체만들어서 돌려주니까 지금 이렇게 여기서 레지스터해주면 될듯..?
     ##########################################################################################################
 
+
+    # i.21.3.19.14:24) hooks.EvalHook 이용해서 이밸류에이션 해주는거나 이거나 내내 똑같은거임.
+    #  hooks.EvalHook 이용하면 이밸류에이션 결과(Trainer.test(~~)의 리턴값)를 EventStorage 에 저장해주고
+    #  hooks.PeriodicWriter 가 그걸 출력해주는 방식이고,
+    #  이거는 곧바로 Trainer.test(~~)의 리턴값을 내뱉는 방식인거고.
     if args.eval_only:
         model = Trainer.build_model(cfg)
+        # i.21.3.19.14:22) 뜯어보진않앗는데, 아마 model 에 웨잇을 로드해주기 위함인듯.
+        #  (바로 위에서 실행해준 Trainer.build_model(cfg) 는 cfg 로부터 웨잇 로드 안함.)
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
             cfg.MODEL.WEIGHTS, resume=args.resume
         )

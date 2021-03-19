@@ -264,7 +264,12 @@ class SimpleTrainer(TrainerBase):
         all_metrics_dict = comm.gather(metrics_dict)
 
         if comm.is_main_process():
-            storage = get_event_storage()
+            # i.21.3.19.11:19) 쭉 코드흐름 따라올라가보면,
+            #  이건 결국 TrainerBase 의 train 함수의 [with EventStorage(start_iter) as self.storage:] 컨텍스트 안에서 실행되고있는거임.
+            #  그렇기때문에 _CURRENT_STORAGE_STACK 에 들어있는 EventStorage 객체를 참조할수있는거임.
+            #  (파이썬 'context manager'인 EventStorage 의 __enter__ 에서 
+            #   _CURRENT_STORAGE_STACK 에 EventStorage 객체를 넣어주고 __exit__ 에서 pop() 해줌.) 
+            storage = get_event_storage() 
 
             # data_time among workers can have high variance. The actual latency
             # caused by data_time is the maximum among workers.
