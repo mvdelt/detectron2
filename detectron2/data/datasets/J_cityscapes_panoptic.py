@@ -112,6 +112,8 @@ Label = namedtuple( 'Label' , [
 #     Label(  'impl'                 ,  9 ,        9 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
 # ]
 
+########### i.21.3.20.18:24) [레퍼런스버전1] 이게 가장 잘 됐던 버전임. 얘만 totIter 6000 까지 돌려주긴 했지만. (트레이닝셋으로 파노3장가지고) #############
+#
 # i.21.3.17.1:04) Rt, Lt 구분 없앤걸로 수정.(걍 귀찮아서 Det2 내장 좌우플립 데이터오그멘테이션 사용해주기 위해서 sinus 랑 canal 의 좌우구분 없애버림.)
 # i.21.3.17.17:38) TODO: sinus, canal 의 hasInstances 를 True 로 해줘야하나???
 # i.21.3.17.19:00) TODO: unlabeled_Label 의 trainId 를 255로 해주는게 나은가??? 그리고나서 모든걸 trainId 기준으로 준비해주고..??
@@ -129,6 +131,8 @@ Label = namedtuple( 'Label' , [
 #     Label(  't_tx'                 ,  6 ,        6 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
 #     Label(  'impl'                 ,  7 ,        7 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
 # ]
+#
+#####################################################################################################################################################
 
 # i.21.3.17.21:09) 
 #    바로위에 내가 코멘트적은대로, sinus 랑 canal 의 hasInstances 를 True 로 해줘보고, maxilla 도 hasInstances 를 True 로 해줘보려함. 
@@ -147,6 +151,15 @@ Label = namedtuple( 'Label' , [
 #     Label(  'impl'                 ,  6 ,        6 , 'toothJ'          , 3       , True         , False        , (116,255, 56) ),
 # ]
 
+
+
+
+
+
+######## i.21.3.20.18:26) 이게 Det2 의 기존코드들대로 해준, 프레딕션 선택지에서 백그라운드는 제외한 버전. 백그라운드가 거의다 sinus로 프레딕션됐었지. #############
+#         이밸류에이션시에는 이런식으로 해주자. 다만, 여기서 좀 수정할부분 있는데,
+#         hasInstances 는 좀 바꿔주는게 좋을듯. [레퍼런스버전1] 처럼 치아나 임플 말고는 stuff 로. 그게 결과가 더 나은듯.
+#
 # i.21.3.18.9:18) 위처럼 mandible 의 id를 0으로 해주니, ~~instanceIds.png 에 mandible 의 id값이 0으로 기록되는데,
 #  J_createPanopticImgs.py 에서 ~~instanceIds.png 로부터 coco어노png 만들어줄때 백그라운드 픽셀들의 값을 [0,0,0]으로 해주는데
 #  mandible 의 id 값이 0이라서 얘도 픽셀들 값이 [0,0,0] 으로 변환돼버림. 그래서 mandible이랑 백그라운드 둘다 [0,0,0]이돼서
@@ -160,17 +173,60 @@ Label = namedtuple( 'Label' , [
 #        즉, Det2 형식에 넣어주는 각 segment_info 의 'category_id' 값은 trainId 이고 요게 연속적으로 0,1,2,.. 일케되는거임)
 #  뭐 결국 바로위의 lables 처럼 해놔도 작동에 문제는 없을듯하네. 지금 이파일에서의 labels 가 중요한게 아니고 cityscapesscripts 의 labels 가 중요한거니까.
 #  (지금 이 파일에서는 각 Label 의 id 값은 사용하지 않는듯.)
+# labels = [
+#     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+#   # Label(  'unlabeled_Label'      ,  0 ,      255 , 'voidJ'           , 0       , False        , True         , (  0,  0,  0) ),  # i. <-없애줌!!/21.3.18.9:29.
+#     Label(  'mandible'             ,  1 ,        0 , 'boneJ'           , 1       , False        , False        , (185,181,247) ),
+#     Label(  'maxilla'              ,  2 ,        1 , 'boneJ'           , 1       , True         , False        , (255,  0,  0) ),  # i. <-상악,하악 hasInstances 다르게해서 비교해줘보려고.
+#     Label(  'sinus'                ,  3 ,        2 , 'sinusJ'          , 2       , True         , False        , (  0,  0,255) ),
+#     Label(  'canal'                ,  4 ,        3 , 'canalJ'          , 3       , True         , False        , ( 76, 68,212) ),
+#     Label(  't_normal'             ,  5 ,        4 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
+#     Label(  't_tx'                 ,  6 ,        5 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
+#     Label(  'impl'                 ,  7 ,        6 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
+# ]
+#
+###########################################################################################################################################################
+
+
+
+############### i.21.3.20.18:31) 시각화용(프레딕션 선택지에 백그라운드 포함) 버전. 머 결국 [레퍼런스버전1] 이랑 똑같이 해주게될듯.################################
+# i.21.3.18.20:44) 바로위처럼 하고 Det2 의 J_cityscapes_panoptic.py 에서 unlabeled_Label 을 없애줬더니, 
+#  프레딕션 되지 않아야할 백그라운드가 foreground 카테고리들로 프레딕션되네;; 특히 sinus 가 많네. 아무래도 sinus가 시커머니까
+#  파노영상의 어두운 백그라운드들이 다 sinus 로 프레딕션되는듯함.
+#    ->그러면 unlabeled 카테고리를 따로 지정하지 않고 어케하지? threshold 를 지정해줘야하나?? 지금 이거 bowen깃헙에 질문올려본상태임.
+#  암튼 그래서 다시 예전처럼 unlabeled_Label 을 살려주려함. unlabeled_Label 의 ignoreInEval 도 다시 False 로 바꿔주고.
+#  아직 수정 다 못했음. 내일 해야함. 
+#
+# i.21.3.20.17:47) 바로위처럼 햇던게 Det2 의 panoptic seg 관련 데이터셋레지스터하는 코드들 해주는대로 따라한건데,
+#  (coco 및 cityscapes 데이터셋들 레지스터하는 코드들)
+#  그러면 그 코드들은 백그라운드 프레딕션을 안하는건가 햇는데, bowen깃헙에서 bowen의 답변 들으니 무슨상황인지 좀 알겟네. 
+#  cityscapse 이밸류에이션 방식에선, 백그라운드는 이밸류에이션에서 제외임!
+#  그니까 백그라운드도 그냥 뭐 죄다 foreground 카테고리로 프레딕션하게 하는게 더 평가에서 유리하겠지(어차피 백그라운드면 점수안깎이니까).
+#  그래서 Det2 의 기존 코드들이 그런식으로(백그라운드는 프레딕션 선택지에서 없도록) 해줬던건가봄.
+#    실제로 coco panoptic api 및 cityscapes 의 panoptic seg 이밸류에이션하는 코드들 (둘다 알렉스 뭐시기가 만든건지 거의 같음)
+#  을 조사해보니, coco 나 cityscapes 나 모두 gt 백그라운드(VOID)는 모델이 뭘로 프레딕션하든지 평가에 반영 안됨. 
+#  뿐만아니라, 코드보니까, gt 가 iscrowd=1(ex: 사람이나 차 등이 잔뜩모여있는경우) 인 경우에도 마찬가지로 이밸류에이션에 반영 안함.
+#  다시간단히말하면, 이미지에서 gt 가 VOID(백그라운드)거나 iscrowd=1 인 부분들은 평가에 반영 안됨. COCO나 cityscapes 나 마찬가지.
+#    따라서, 요 코드로 이밸류에이션할땐 프레딕션할 선택지에서 백그라운드(VOID. 즉 'unlabeled')를 없애주는게 조금이라도 더 유리할거고,
+#  그냥 시각화해서 사람눈으로 볼 용도로는 프레딕션할 선택지에 백그라운드도 포함시켜주는게 좋겠네.
+#  (안그러면 바로위처럼 해줬을때처럼 sinus 등 foreground 카테고리들이 백그라운드를 뒤덮을테니)
+#    자, 그럼, 
+#  (1) 일단 시각화할 용도로 백그라운드(내플젝의경우 'unlabeled_Label') 도 프레딕션하게 해주자. 
+#      바로아래 labels 및 관련 코드들을 그렇게 설정해줄거임.
+#  (2) (1)이 잘 되고나면, 이밸류에이션 용도로 프레딕션 선택지에서 백그라운드 제외해서도 하자.
+#      지금 코멘트아웃돼있는 바로 위 labels 이용하고 관련 코드들도 그에맞게 변경해주면 되지.
 labels = [
-    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-  # Label(  'unlabeled_Label'      ,  0 ,      255 , 'voidJ'           , 0       , False        , True         , (  0,  0,  0) ),  # i. <-없애줌!!/21.3.18.9:29.
-    Label(  'mandible'             ,  1 ,        0 , 'boneJ'           , 1       , False        , False        , (185,181,247) ),
-    Label(  'maxilla'              ,  2 ,        1 , 'boneJ'           , 1       , True         , False        , (255,  0,  0) ),  # i. <-상악,하악 hasInstances 다르게해서 비교해줘보려고.
-    Label(  'sinus'                ,  3 ,        2 , 'sinusJ'          , 2       , True         , False        , (  0,  0,255) ),
-    Label(  'canal'                ,  4 ,        3 , 'canalJ'          , 3       , True         , False        , ( 76, 68,212) ),
-    Label(  't_normal'             ,  5 ,        4 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
-    Label(  't_tx'                 ,  6 ,        5 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
-    Label(  'impl'                 ,  7 ,        6 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color(RGB)
+    Label(  'unlabeled_Label'      ,  0 ,        0,  'voidJ'           , 0       , False        , False        , (  0,  0,  0) ),
+    Label(  'mandible'             ,  1 ,        1 , 'boneJ'           , 1       , False        , False        , (135,128,255) ),
+    Label(  'maxilla'              ,  2 ,        2 , 'boneJ'           , 1       , False        , False        , (207,221,255) ),
+    Label(  'sinus'                ,  3 ,        3 , 'sinusJ'          , 2       , False        , False        , (  0,  0,255) ),
+    Label(  'canal'                ,  4 ,        4 , 'canalJ'          , 3       , False        , False        , (255,  0,  0) ),  # i. canal 이 젤 고난이도니까, 나중에 hasInstances True로도 실험해보자 어찌되는지.
+    Label(  't_normal'             ,  5 ,        5 , 'toothJ'          , 4       , True         , False        , ( 66,158, 27) ),
+    Label(  't_tx'                 ,  6 ,        6 , 'toothJ'          , 4       , True         , False        , ( 88,214, 34) ),
+    Label(  'impl'                 ,  7 ,        7 , 'toothJ'          , 4       , True         , False        , (116,255, 56) ),
 ]
+###########################################################################################################################################################
 
 
 
