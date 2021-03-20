@@ -161,8 +161,6 @@ class Trainer(DefaultTrainer):
             list[HookBase]:
         """
         
-        # i.21.2.13.15:22)
-        print('j) This is build_hooks method, evaluation hook removed version!!')
         
         cfg = self.cfg.clone()
         cfg.defrost()
@@ -194,6 +192,8 @@ class Trainer(DefaultTrainer):
             self._last_eval_results = self.test(self.cfg, self.model)
             return self._last_eval_results
 
+        # i.21.2.13.15:22)
+        print('j) This is build_hooks method, evaluation hook removed version!!')
         # # Do evaluation after checkpointer, because then if it fails,
         # # we can use the saved checkpoint to debug.
         # ret.append(hooks.EvalHook(cfg.TEST.EVAL_PERIOD, test_and_save_results)) 
