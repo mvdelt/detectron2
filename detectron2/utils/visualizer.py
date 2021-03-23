@@ -1045,23 +1045,47 @@ class Visualizer:
         mask = GenericMask(binary_mask, self.output.height, self.output.width)
         shape2d = (binary_mask.shape[0], binary_mask.shape[1])
 
-        if not mask.has_holes:
-            # draw polygons for regular masks
-            for segment in mask.polygons:
-                area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
-                if area < (area_threshold or 0):
-                    continue
-                has_valid_segment = True
-                segment = segment.reshape(-1, 2)
-                self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
-        else:
-            # TODO: Use Path/PathPatch to draw vector graphics:
-            # https://stackoverflow.com/questions/8919719/how-to-plot-a-complex-polygon
-            rgba = np.zeros(shape2d + (4,), dtype="float32")
-            rgba[:, :, :3] = color
-            rgba[:, :, 3] = (mask.mask == 1).astype("float32") * alpha
+
+
+        #########################################################################################################
+        # i.21.3.23.11:14) 내 치과파노플젝(panoptic segmentation) 시각화결과 보니까,
+        #  똑같은 stuff라도, 예를들어 sinus가 어떤 이미지에선 테두리가 그려져있고 다른 이미지(다른파일)에선
+        #  테두리가 없고 그러길래 살펴보는중인데, 
+        #    mask.has_holes 에 따라서 그려주는 방식이 달라서 테두리가 있기도하고 없기도하는듯함.
+        #  (hole 이 없는경우에 테두리를 그려주는듯함.)
+        #  근데 테두리를 그려주는게 뭔가 더 깔끔하고 좋은것같아서 전부 다 테두리를 그려주려함.
+        #  (참고로 테두리색깔은 아까보니 _OFF_WHITE 였나 하는 변수에서 정해놨네.)
+        #    그래서 이 if else 분기문 코멘트아웃하고, hole이 있든 없든 모든경우에 테두리 그려줘보려함. 
+        #  걍 함 해보는데 잘 될지는 모르겟음.
+
+        # if not mask.has_holes:
+        #     # draw polygons for regular masks
+        #     for segment in mask.polygons:
+        #         area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+        #         if area < (area_threshold or 0):
+        #             continue
+        #         has_valid_segment = True
+        #         segment = segment.reshape(-1, 2)
+        #         self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
+        # else:
+        #     # TODO: Use Path/PathPatch to draw vector graphics:
+        #     # https://stackoverflow.com/questions/8919719/how-to-plot-a-complex-polygon
+        #     rgba = np.zeros(shape2d + (4,), dtype="float32")
+        #     rgba[:, :, :3] = color
+        #     rgba[:, :, 3] = (mask.mask == 1).astype("float32") * alpha
+        #     has_valid_segment = True
+        #     self.output.ax.imshow(rgba, extent=(0, self.output.width, self.output.height, 0))
+        
+        for segment in mask.polygons:
+            area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+            if area < (area_threshold or 0):
+                continue
             has_valid_segment = True
-            self.output.ax.imshow(rgba, extent=(0, self.output.width, self.output.height, 0))
+            segment = segment.reshape(-1, 2)
+            self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
+
+        #########################################################################################################
+
 
         if text is not None and has_valid_segment:
             # TODO sometimes drawn on wrong objects. the heuristics here can improve.
