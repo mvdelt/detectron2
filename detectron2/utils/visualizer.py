@@ -1120,7 +1120,7 @@ class Visualizer:
             print('j) hole exist!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             for segment in mask.polygons:
                 area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
-                print(f'j) contourArr: {segment}')
+                # print(f'j) contourArr: {segment}')
                 print(f'j) contourArea: {area}')
                 if area < (area_threshold or 0):
                     continue
