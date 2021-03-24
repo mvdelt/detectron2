@@ -479,9 +479,10 @@ class Visualizer:
         return self.output
 
     # def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.7):
-    # i.21.3.24.12:08) 디버그위해 alpha값 변경해줘봄.
+    # i.21.3.24.12:08) 디버그위해 alpha값 변경해줘봄.    
     #  참고로, 이 함수는 인풋이미지 *1개*의 프레딕션결과에 대해 실행되는거임.
-    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.2):
+    # i.21.3.24.16:11) 디버그위해 area_threshold 지정해줘봄.
+    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=50, alpha=0.2):
         """
         Draw panoptic prediction annotations or results.
 
