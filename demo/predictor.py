@@ -60,12 +60,12 @@ class VisualizationDemo(object):
             #  아마 지금 이 부분은 실행되지 않아야 정상일거임.
             print('j) !!!!!!!!! there is NO "panoptic_seg" in return value of VisualizationDemo.predictor(image)!!!!!!')
             if "sem_seg" in predictions:
-            print('j) there is "sem_seg" in return value of VisualizationDemo.predictor(image)')
+                print('j) there is "sem_seg" in return value of VisualizationDemo.predictor(image)')
                 vis_output = visualizer.draw_sem_seg(
                     predictions["sem_seg"].argmax(dim=0).to(self.cpu_device)
                 )
             if "instances" in predictions:
-            print('j) there is "instances" in return value of VisualizationDemo.predictor(image)')
+                print('j) there is "instances" in return value of VisualizationDemo.predictor(image)')
                 instances = predictions["instances"].to(self.cpu_device)
                 vis_output = visualizer.draw_instance_predictions(predictions=instances)
 
