@@ -456,7 +456,8 @@ _RAW_PANOPTICSEG_DENTPANO_SPLITS_J = {
         "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
         "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_train.json", # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.
     ),
-    # i.21.3.11.22:56) TODO: val 관련된것들은 아직 안만들어준 상태임.
+    # i.21.3.11.22:56) val 관련된것들은 아직 안만들어준 상태임.
+    # i.21.3.24.19:32) 지금 요 코드는 예전에 이미 적어놨었네. 이제 val 준비 다됐음.
     "panopticSeg_dentPanoJ_val": (
         "panopticSeg_dentPanoJ/inputOriPano/val", # i. 원 인풋이미지들 있는 디렉토리./21.3.10.12:02.
         "panopticSeg_dentPanoJ/gt/J_cocoformat_panoptic_val", # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.
