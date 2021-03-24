@@ -125,6 +125,28 @@ class GenericMask:
             return [], False
         has_holes = (hierarchy.reshape(-1, 4)[:, 3] >= 0).sum() > 0
         res = res[-2]
+
+
+        #########################################################################################################
+        # i.21.3.24.13:35) (내 치과파노라마 panoptic seg 플젝에만 적용)
+        #  hole 에 해당하는(부모가 있는) polygon들은 제외함. 시각화결과 그려줄때 hole 안그려주려고.
+        #
+        # i. 참고: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contours_begin/py_contours_begin.html
+        # image, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        #
+        # ...And it outputs the image, contours and hierarchy. 
+        # contours is a Python list of all the contours in the image. 
+        # Each individual contour is a Numpy array of (x,y) coordinates of boundary points of the object.
+        #
+        # 즉, 지금 이 코드라인 위치에서 res 는 바로위 설명의 'contours' 에 해당하니까, 이는 list[arr] 임. 각 arr 는 컨투어이고.
+        # 이제 여기서 hole에 해당하는 컨투어(부모가 있는 놈들. hierarchy-2 소속.)는 제외해줌. 즉, 부모가 없는놈들(hierarchy-1 소속) 만 골라냄.
+        # 참고로, hierarchy.reshape(-1,4)[:,3] 이 각 컨투어의 부모 컨투어의 인덱스들이고, 이 값이 -1 이면 부모가 없는것임. 
+        # 위 참고 링크 가보면 설명 다 나옴.
+        # res = [contourArr for cdx, contourArr in enumerate(res) if hierarchy.reshape(-1,4)[:,3][cdx]==-1] <-일케해줘도됨.
+        res = [contourArr for contourArr, parentIdx in zip(res, hierarchy.reshape(-1,4)[:,3]) if parentIdx==-1]
+        #########################################################################################################
+
+
         res = [x.flatten() for x in res]
         # These coordinates from OpenCV are integers in range [0, W-1 or H-1].
         # We add 0.5 to turn them into real-value coordinate space. A better solution
@@ -454,7 +476,10 @@ class Visualizer:
             )
         return self.output
 
-    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.7):
+    # def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.7):
+    # i.21.3.24.12:08) 디버그위해 alpha값 변경해줘봄.
+    #  참고로, 이 함수는 인풋이미지 *1개*의 프레딕션결과에 대해 실행되는거임.
+    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.1):
         """
         Draw panoptic prediction annotations or results.
 
@@ -509,6 +534,7 @@ class Visualizer:
         )
 
         try:
+            # i.21.3.24.12:15) "thing" 들 색칠할때 랜덤하게 조금씩 색 변경해주는 부분.
             colors = [
                 self._jitter([x / 255 for x in self.metadata.thing_colors[c]]) for c in category_ids
             ]
@@ -1076,13 +1102,26 @@ class Visualizer:
         #     has_valid_segment = True
         #     self.output.ax.imshow(rgba, extent=(0, self.output.width, self.output.height, 0))
         
-        for segment in mask.polygons:
-            area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
-            if area < (area_threshold or 0):
-                continue
-            has_valid_segment = True
-            segment = segment.reshape(-1, 2)
-            self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
+        if not mask.has_holes:
+            print('j) no hole')
+            # draw polygons for regular masks
+            for segment in mask.polygons:
+                area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+                if area < (area_threshold or 0):
+                    continue
+                has_valid_segment = True
+                segment = segment.reshape(-1, 2)
+                self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
+        else:
+            print('j) hole exist.')
+            for segment in mask.polygons:
+                area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+                if area < (area_threshold or 0):
+                    continue
+                has_valid_segment = True
+                segment = segment.reshape(-1, 2)
+                self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
+
 
         #########################################################################################################
 

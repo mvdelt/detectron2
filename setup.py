@@ -211,8 +211,27 @@ setup(
         "matplotlib",
         "tqdm>4.29.0",
         "tensorboard",
-        "fvcore>=0.1.3,<0.1.4",  # required like this to make it pip installable
-        "iopath>=0.1.2",
+
+
+        # i.21.3.24.11:43) 갑자기 어젯밤부터 트레이닝이 안되는데, 트레이닝 시작할 웨잇 불러오는과정에서 
+        #  fvcore 버전이랑 iopath 버전 호환이 안되면 문제가 발생하는듯해서 fvcore랑 iopath 버전히스토리 확인해보니, 
+        #  둘다 아주 최근 뭐 거의 몇시간전, 바로어제 새버전 릴리즈되고 이런걸로봐서 여기서 문제가 있는듯해서,
+        #  Det2 리포지토리 가서 setup.py 보니, 역시 뭔가가 바뀌어있음. 
+        #    일단 논문2(치과파노라마에서 panoptic seg 하는거. panoptic deeplab 이용.) 끝날때까지는, 내가 Git 에대해 아직 잘 몰라서 혹시 문제생길지 모르니
+        #  Det2_mvdeltGithub 을 Det2 원 리포지토리의 업데이트를 반영해서 업데이트(git fetch & merge 등) 하지않으려해서,
+        #  일단 내가 직접 이렇게 수정된부분 복붙해놓음.
+        # 
+        # Lock version of fvcore/iopath because they may have breaking changes
+        # NOTE: when updating fvcore/iopath version, make sure fvcore depends
+        # on the same version of iopath.
+        "fvcore>=0.1.4,<0.1.5",  # required like this to make it pip installable
+        "iopath>=0.1.7,<0.1.8",
+
+        # i.21.3.24.11:50) 요 두줄이 기존 코드.
+        # "fvcore>=0.1.3,<0.1.4",  # required like this to make it pip installable
+        # "iopath>=0.1.2",
+
+
         "pycocotools>=2.0.2",  # corresponds to https://github.com/ppwwyyxx/cocoapi
         "future",  # used by caffe2
         "pydot",  # used to save caffe2 SVGs
