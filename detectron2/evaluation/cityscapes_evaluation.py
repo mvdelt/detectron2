@@ -199,6 +199,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         predictionImgList = []
         for gt in groundTruthImgList:
             print('j) gt in groundTruthImgList . . . . . . . . . . . . . . .')
+            # i.21.3.24.21:14) ######################### 지금하고있는부분!! 코랩 돌리면 여기서 에러남!!!
             predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt))
         results = cityscapes_eval.evaluateImgLists(
             predictionImgList, groundTruthImgList, cityscapes_eval.args

@@ -235,6 +235,13 @@ setup(
         "pycocotools>=2.0.2",  # corresponds to https://github.com/ppwwyyxx/cocoapi
         "future",  # used by caffe2
         "pydot",  # used to save caffe2 SVGs
+
+
+        # i.21.3.25.0:46) fvcore 랑 iopath Det2최신깃헙소스대로 바꿧는데도 안돼서, 혹시
+        #  얘네들도 추가됏길래 얘네도 설치해주면 되려나 해서 붙여놔봄.(기존엔 이 두개는 없었음.)
+        "dataclasses; python_version<'3.7'",
+        "omegaconf==2.1.0.dev22",
+
     ],
     extras_require={
         "all": [
