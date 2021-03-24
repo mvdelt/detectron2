@@ -143,7 +143,9 @@ class GenericMask:
         # 참고로, hierarchy.reshape(-1,4)[:,3] 이 각 컨투어의 부모 컨투어의 인덱스들이고, 이 값이 -1 이면 부모가 없는것임. 
         # 위 참고 링크 가보면 설명 다 나옴.
         # res = [contourArr for cdx, contourArr in enumerate(res) if hierarchy.reshape(-1,4)[:,3][cdx]==-1] <-일케해줘도됨.
-        res = [contourArr for contourArr, parentIdx in zip(res, hierarchy.reshape(-1,4)[:,3]) if parentIdx==-1]
+        
+        # res = [contourArr for contourArr, parentIdx in zip(res, hierarchy.reshape(-1,4)[:,3]) if parentIdx==-1]
+        
         #########################################################################################################
 
 
