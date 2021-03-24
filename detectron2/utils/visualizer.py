@@ -482,7 +482,7 @@ class Visualizer:
     # i.21.3.24.12:08) 디버그위해 alpha값 변경해줘봄.    
     #  참고로, 이 함수는 인풋이미지 *1개*의 프레딕션결과에 대해 실행되는거임.
     # i.21.3.24.16:11) 디버그위해 area_threshold 지정해줘봄.
-    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=100, alpha=0.7):
+    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=300, alpha=0.3):
         """
         Draw panoptic prediction annotations or results.
 
@@ -1087,6 +1087,7 @@ class Visualizer:
         #    그래서 이 if else 분기문 코멘트아웃하고, hole이 있든 없든 모든경우에 테두리 그려줘보려함. 
         #  걍 함 해보는데 잘 될지는 모르겟음.
 
+        # # i. -------원래코드-------------
         # if not mask.has_holes:
         #     # draw polygons for regular masks
         #     for segment in mask.polygons:
@@ -1104,7 +1105,10 @@ class Visualizer:
         #     rgba[:, :, 3] = (mask.mask == 1).astype("float32") * alpha
         #     has_valid_segment = True
         #     self.output.ax.imshow(rgba, extent=(0, self.output.width, self.output.height, 0))
+        # # i. -------원래코드 끝-------------
         
+
+
         if not mask.has_holes:
             print('j) no hole')
             # draw polygons for regular masks
