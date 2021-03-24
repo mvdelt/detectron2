@@ -57,7 +57,7 @@ class VisualizationDemo(object):
             )
         else:
             # i.21.3.24.12:05) 지금 panoptic seg 태스크 하고있으니, 
-            #  아마 지금 이 부분은 실행되지 않아야 정상일거임.
+            #  아마 지금 이 부분은 실행되지 않아야 정상일거임.->ㅇㅇ실행안되네.
             print('j) !!!!!!!!! there is NO "panoptic_seg" in return value of VisualizationDemo.predictor(image)!!!!!!')
             if "sem_seg" in predictions:
                 print('j) there is "sem_seg" in return value of VisualizationDemo.predictor(image)')
