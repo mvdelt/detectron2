@@ -1109,15 +1109,19 @@ class Visualizer:
             # draw polygons for regular masks
             for segment in mask.polygons:
                 area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+                print(f'j) contourArr: {segment}')
+                print(f'j) contourArea: {area}')
                 if area < (area_threshold or 0):
                     continue
                 has_valid_segment = True
                 segment = segment.reshape(-1, 2)
                 self.draw_polygon(segment, color=color, edge_color=edge_color, alpha=alpha)
         else:
-            print('j) hole exist.')
+            print('j) hole exist!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             for segment in mask.polygons:
                 area = mask_util.area(mask_util.frPyObjects([segment], shape2d[0], shape2d[1]))
+                print(f'j) contourArr: {segment}')
+                print(f'j) contourArea: {area}')
                 if area < (area_threshold or 0):
                     continue
                 has_valid_segment = True
