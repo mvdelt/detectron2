@@ -55,6 +55,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
     """
 
     def process(self, inputs, outputs):
+
+        print('j) CityscapesInstanceEvaluator.process starts!!! ~~~~~~~~~~~')
+
         from cityscapesscripts.helpers.labels import name2label
 
         for input, output in zip(inputs, outputs):
@@ -90,6 +93,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         Returns:
             dict: has a key "segm", whose value is a dict of "AP" and "AP50".
         """
+        
+        print('j) CityscapesInstanceEvaluator.evaluate starts!!! ~~~~~~~~~~~')
+
         comm.synchronize()
         if comm.get_rank() > 0:
             return
@@ -137,6 +143,9 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
     """
 
     def process(self, inputs, outputs):
+        
+        print('j) CityscapesSemSegEvaluator.process starts!!! ~~~~~~~~~~~')
+
         from cityscapesscripts.helpers.labels import trainId2label
 
         for input, output in zip(inputs, outputs):
@@ -153,6 +162,9 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             Image.fromarray(pred).save(pred_filename)
 
     def evaluate(self):
+        
+        print('j) CityscapesSemSegEvaluator.evaluate starts!!! ~~~~~~~~~~~')
+
         comm.synchronize()
         if comm.get_rank() > 0:
             return
@@ -186,6 +198,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         )
         predictionImgList = []
         for gt in groundTruthImgList:
+            print('j) gt in groundTruthImgList . . . . . . . . . . . . . . .')
             predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt))
         results = cityscapes_eval.evaluateImgLists(
             predictionImgList, groundTruthImgList, cityscapes_eval.args
