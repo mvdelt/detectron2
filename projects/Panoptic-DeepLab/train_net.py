@@ -245,6 +245,10 @@ def main(args):
     #  hooks.EvalHook 이용하면 이밸류에이션 결과(Trainer.test(~~)의 리턴값)를 EventStorage 에 저장해주고
     #  hooks.PeriodicWriter 가 그걸 출력해주는 방식이고,
     #  이거는 곧바로 Trainer.test(~~)의 리턴값을 내뱉는 방식인거고.
+    # i.21.3.24.20:05) TODO Q: 근데 Trainer.test 함수를 실행만 시켜도 결과 출력되나? 
+    #  여기선 리턴값을 따로 출력해주진 않는데;; 
+    #  만약 실행만 시켜도 결과 출력되면, EvalHook 이용한건 똑같은게 두번출력되겟는데?
+    #  근데 내기억엔 안그랬던것같은데;; 지금코드살펴볼시간없으니 일단 실행시켜보자.
     if args.eval_only:
         model = Trainer.build_model(cfg)
         # i.21.3.19.14:22) 뜯어보진않앗는데, 아마 model 에 웨잇을 로드해주기 위함인듯.
@@ -253,11 +257,16 @@ def main(args):
             cfg.MODEL.WEIGHTS, resume=args.resume
         )
         res = Trainer.test(cfg, model)
+        
+        print('j) ----------------------------------------------------------')
+        print(f'j) test result: {res}') # i. <-이런식으로 출력해줘보자. 똑같은거 또나오나. /21.3.24.20:18.
+        
         return res
 
 
+
     trainer = Trainer(cfg)
-    trainer.resume_or_load(resume=args.resume)
+    trainer.resume_or_load(resume=args.resume) 
     return trainer.train()
 
 
