@@ -142,7 +142,7 @@ def inference_on_dataset(model, data_loader, evaluator):
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
             total_compute_time += time.perf_counter() - start_compute_time
-            evaluator.process(inputs, outputs)
+            evaluator.process(inputs, outputs) ########################################### /21.3.25.12:12.
 
             iters_after_start = idx + 1 - num_warmup * int(idx >= num_warmup)
             seconds_per_img = total_compute_time / iters_after_start
@@ -173,7 +173,7 @@ def inference_on_dataset(model, data_loader, evaluator):
         )
     )
 
-    results = evaluator.evaluate()
+    results = evaluator.evaluate() ########################################### /21.3.25.12:12.
     # An evaluator may return None when not in main process.
     # Replace it by an empty dict instead to make it easier for downstream code to handle
     if results is None:

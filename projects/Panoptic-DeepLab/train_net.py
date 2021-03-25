@@ -76,17 +76,17 @@ class Trainer(DefaultTrainer):
         if cfg.MODEL.PANOPTIC_DEEPLAB.BENCHMARK_NETWORK_SPEED:
             return None
         if output_folder is None:
-            output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
+            output_folder = os.path.join(cfg.OUTPUT_DIR, "inference") # i. 요기서 "inference" 폴더가 등장하는거였군. /21.3.25.11:58.
         evaluator_list = []
         evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
         if evaluator_type in ["cityscapes_panoptic_seg", "coco_panoptic_seg"]:
-            evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
+            evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder)) ########################################### /21.3.25.11:56.
         if evaluator_type == "cityscapes_panoptic_seg":
             assert (
                 torch.cuda.device_count() >= comm.get_rank()
             ), "CityscapesEvaluator currently do not work with multiple machines."
-            evaluator_list.append(CityscapesSemSegEvaluator(dataset_name))
-            evaluator_list.append(CityscapesInstanceEvaluator(dataset_name))
+            evaluator_list.append(CityscapesSemSegEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
+            evaluator_list.append(CityscapesInstanceEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
         if evaluator_type == "coco_panoptic_seg":
             # `thing_classes` in COCO panoptic metadata includes both thing and
             # stuff classes for visualization. COCOEvaluator requires metadata
@@ -97,7 +97,7 @@ class Trainer(DefaultTrainer):
                 "coco_2017_val_100_panoptic": "coco_2017_val_100",
             }
             evaluator_list.append(
-                COCOEvaluator(dataset_name_mapper[dataset_name], output_dir=output_folder)
+                COCOEvaluator(dataset_name_mapper[dataset_name], output_dir=output_folder) # i. <- 요놈은 사용해줄까 말까? COCOPanopticEvaluator 랑 뭐가다른거지?? /21.3.25.11:56.
             )
         if len(evaluator_list) == 0:
             raise NotImplementedError(
@@ -110,7 +110,7 @@ class Trainer(DefaultTrainer):
         return DatasetEvaluators(evaluator_list)
 
     @classmethod
-    def build_train_loader(cls, cfg):
+    def build_train_loader(cls, cfg): # i.21.3.25.12:41) TODO Q: 왜 build_test_loader 는 오버라이드 안해주지???????????? 테스트할때도 mapper 필요하지않나??????????????
         mapper = PanopticDeeplabDatasetMapper(cfg, augmentations=build_sem_seg_train_aug(cfg))
         return build_detection_train_loader(cfg, mapper=mapper)
 
