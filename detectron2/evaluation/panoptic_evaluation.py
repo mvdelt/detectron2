@@ -64,6 +64,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
         return segment_info
 
     def process(self, inputs, outputs):
+
+        print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
+
         from panopticapi.utils import id2rgb
 
         for input, output in zip(inputs, outputs):
@@ -111,6 +114,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
     def evaluate(self):
         comm.synchronize()
+
+        print('j) COCOPanopticEvaluator.evaluate starts!!! cococococococococococococococococo')
 
         self._predictions = comm.gather(self._predictions)
         self._predictions = list(itertools.chain(*self._predictions))
