@@ -317,7 +317,7 @@ def _train_loader_from_config(cfg, mapper=None, *, dataset=None, sampler=None):
         )
 
     if mapper is None:
-        mapper = DatasetMapper(cfg, True)
+        mapper = DatasetMapper(cfg, True) # i. 인풋인자로 is_train 여부 True/False 넣어주고있음!! 트레이닝이니까 True!! 이제 트레이닝시에 하는것들 해주겠지!! /21.3.26.0:54.
 
     if sampler is None:
         sampler_name = cfg.DATALOADER.SAMPLER_TRAIN
@@ -406,7 +406,7 @@ def _test_loader_from_config(cfg, dataset_name, mapper=None):
         else None,
     )
     if mapper is None:
-        mapper = DatasetMapper(cfg, False)
+        mapper = DatasetMapper(cfg, False) # i. 인풋인자로 is_train 여부 True/False 넣어주고있음!! 테스트니까 False!! 이제 트레이닝시에 하는것들은 안해주겠지!! /21.3.26.0:54.
     return {"dataset": dataset, "mapper": mapper, "num_workers": cfg.DATALOADER.NUM_WORKERS}
 
 
