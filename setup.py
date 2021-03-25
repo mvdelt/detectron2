@@ -213,19 +213,25 @@ setup(
         "tensorboard",
 
 
-        # i.21.3.24.11:43) 갑자기 어젯밤부터 트레이닝이 안되는데, 트레이닝 시작할 웨잇 불러오는과정에서 
-        #  fvcore 버전이랑 iopath 버전 호환이 안되면 문제가 발생하는듯해서 fvcore랑 iopath 버전히스토리 확인해보니, 
-        #  둘다 아주 최근 뭐 거의 몇시간전, 바로어제 새버전 릴리즈되고 이런걸로봐서 여기서 문제가 있는듯해서,
-        #  Det2 리포지토리 가서 setup.py 보니, 역시 뭔가가 바뀌어있음. 
-        #    일단 논문2(치과파노라마에서 panoptic seg 하는거. panoptic deeplab 이용.) 끝날때까지는, 내가 Git 에대해 아직 잘 몰라서 혹시 문제생길지 모르니
-        #  Det2_mvdeltGithub 을 Det2 원 리포지토리의 업데이트를 반영해서 업데이트(git fetch & merge 등) 하지않으려해서,
-        #  일단 내가 직접 이렇게 수정된부분 복붙해놓음.
-        # 
-        # Lock version of fvcore/iopath because they may have breaking changes
-        # NOTE: when updating fvcore/iopath version, make sure fvcore depends
-        # on the same version of iopath.
-        "fvcore>=0.1.4,<0.1.5",  # required like this to make it pip installable
-        "iopath>=0.1.7,<0.1.8",
+        # # i.21.3.24.11:43) 갑자기 어젯밤부터 트레이닝이 안되는데, 트레이닝 시작할 웨잇 불러오는과정에서 
+        # #  fvcore 버전이랑 iopath 버전 호환이 안되면 문제가 발생하는듯해서 fvcore랑 iopath 버전히스토리 확인해보니, 
+        # #  둘다 아주 최근 뭐 거의 몇시간전, 바로어제 새버전 릴리즈되고 이런걸로봐서 여기서 문제가 있는듯해서,
+        # #  Det2 리포지토리 가서 setup.py 보니, 역시 뭔가가 바뀌어있음. 
+        # #    일단 논문2(치과파노라마에서 panoptic seg 하는거. panoptic deeplab 이용.) 끝날때까지는, 내가 Git 에대해 아직 잘 몰라서 혹시 문제생길지 모르니
+        # #  Det2_mvdeltGithub 을 Det2 원 리포지토리의 업데이트를 반영해서 업데이트(git fetch & merge 등) 하지않으려해서,
+        # #  일단 내가 직접 이렇게 수정된부분 복붙해놓음.
+        # #
+        # # Lock version of fvcore/iopath because they may have breaking changes
+        # # NOTE: when updating fvcore/iopath version, make sure fvcore depends
+        # # on the same version of iopath.
+        # "fvcore>=0.1.4,<0.1.5",  # required like this to make it pip installable
+        # "iopath>=0.1.7,<0.1.8",
+        #
+        # # i.21.3.25.10:09) ->위처럼 해도 안됨. 이 버전들은 Det2 최신버전(현재 0.4릴리즈됏음. 난 그전에 포크한거 내가수정해서 쓰고있는중인거고.)
+        # #  일때는 아마 잘 될텐데, 지금 내 Det2 버전상태에선 잘 안되나봄. 걍 며칠전까지 잘되던 fvcore,iopath버전으로 해줘야할듯.
+        "fvcore>=0.1.3,<0.1.4",  # required like this to make it pip installable <- fvcore 는 기존코드와 동일.
+        "iopath>=0.1.2,<0.1.7", # <- iopath만 버전 상한선 설정만 해줬음. 기존코드에선 상한선이 없었음.
+        
 
         # i.21.3.24.11:50) 요 두줄이 기존 코드.
         # "fvcore>=0.1.3,<0.1.4",  # required like this to make it pip installable
@@ -235,12 +241,16 @@ setup(
         "pycocotools>=2.0.2",  # corresponds to https://github.com/ppwwyyxx/cocoapi
         "future",  # used by caffe2
         "pydot",  # used to save caffe2 SVGs
-
+        
 
         # i.21.3.25.0:46) fvcore 랑 iopath Det2최신깃헙소스대로 바꿧는데도 안돼서, 혹시
         #  얘네들도 추가됏길래 얘네도 설치해주면 되려나 해서 붙여놔봄.(기존엔 이 두개는 없었음.)
-        "dataclasses; python_version<'3.7'",
-        "omegaconf==2.1.0.dev22",
+        #    ->자야하는데 Det2 다시설치할 시간 없어서 
+        #      걍 fvcore 랑 iopath 를 예전버전으로 pip 으로 설치해주니 일단 되네(코랩에서). /21.3.25.1:00.
+        #      # i.21.3.25.10:08) 자고나서 보니 체크포인트 저장할때 iopath 관련 에러낫네;;; 
+        #         다시돌려볼시간없음. 걍 며칠전까지 잘되던 딱 그버전으로 해줘야할듯.
+        # "dataclasses; python_version<'3.7'",
+        # "omegaconf==2.1.0.dev22",
 
     ],
     extras_require={
