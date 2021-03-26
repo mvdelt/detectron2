@@ -43,7 +43,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
         }
 
         PathManager.mkdirs(output_dir)
-        self._predictions_json = os.path.join(output_dir, "predictions.json")
+        # self._predictions_json = os.path.join(output_dir, "predictions.json")
+        self._predictions_json = os.path.join(output_dir, "predictionsTestJ.json")
 
     def reset(self):
         self._predictions = []
@@ -117,6 +118,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         "file_name": file_name_png,
                         "png_string": out.getvalue(),
                         "segments_info": segments_info,
+
+                        "testJ": "this_is_test_j",
                     }
                 )
 
@@ -131,8 +134,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             return
 
         # PanopticApi requires local files
-        gt_json = PathManager.get_local_path(self._metadata.panoptic_json)
-        gt_folder = PathManager.get_local_path(self._metadata.panoptic_root)
+        gt_json = PathManager.get_local_path(self._metadata.panoptic_json) # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26.
+        gt_folder = PathManager.get_local_path(self._metadata.panoptic_root) # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26.
 
         with tempfile.TemporaryDirectory(prefix="panoptic_eval") as pred_dir:
             logger.info("Writing all panoptic predictions to {} ...".format(pred_dir))
