@@ -68,9 +68,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
         print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
         print(f'j) inputs: {inputs}')      
-        print(f'j) len(inputs): {len(inputs)}')      
+        print(f'j) len(inputs): {len(inputs)}')      # 1  (예상대로임. 테스트시에는 뱃치사이즈가 1이라고 어디서 봤음.)
         print(f'j) outputs: {outputs}') 
-        print(f'j) len(outputs): {len(outputs)}') 
+        print(f'j) len(outputs): {len(outputs)}')    # 1
 
         from panopticapi.utils import id2rgb
 
@@ -79,7 +79,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             panoptic_img = panoptic_img.cpu().numpy()
             if segments_info is None:
 
-                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 이거 출력됨. /21.3.26.16:06.
+                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!') 
 
                 # If "segments_info" is None, we assume "panoptic_img" is a
                 # H*W int32 image storing the panoptic_id in the format of
@@ -100,13 +101,16 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         {
                             "id": int(panoptic_label) + 1,
                             "category_id": int(pred_class),
-                            "isthing": bool(isthing),
+                            "isthing": bool(isthing), # i. 얘도 안적혀잇음........ 엥?? /21.3.26.16:12.
+
+                            "pred_segInfo_testJ":"segInfo_testJ",
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
                 panoptic_img += 1
 
             else:
+                # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 얜 출력안되고있음. /21.3.26.16:06.
                 print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 있음!!!!!!')
 
             file_name = os.path.basename(input["file_name"])
@@ -118,10 +122,10 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     {
                         "image_id": input["image_id"],
                         "file_name": file_name_png,
-                        "png_string": out.getvalue(),
+                        "png_string": out.getvalue(), # i. 이것만 안적혀있음. 뭐지?????? /21.3.26.16:11.
                         "segments_info": segments_info,
 
-                        "testJ": "this_is_test_j",
+                        "pred_annotation_testJ": "this_is_test_j", # i. 확인해보니 요건 잘 적혀있음. /21.3.26.16:09.
                     }
                 )
 
