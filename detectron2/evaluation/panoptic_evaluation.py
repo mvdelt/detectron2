@@ -101,10 +101,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         {
                             "id": int(panoptic_label) + 1,
                             "category_id": int(pred_class),
-                            "isthing": bool(isthing), # i. 얘도 안적혀잇음........ 엥?? /21.3.26.16:12.
-
-                            "pred_segInfo_testJ":"segInfo_testJ",
-                            "isthingJ": bool(isthing), # i. 테스트. 얜 또 적힘... 뭐지?????????? /21.3.26.16:27.
+                            "isthing": bool(isthing), # i. 얘도 안적혀잇음...엥?? /21.3.26.16:12. ->_convert_category_id 에서 pop해주자나;;; /21.3.26.18:40.
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
@@ -126,11 +123,10 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     {
                         "image_id": input["image_id"],
                         "file_name": file_name_png,
-                        "png_string": out.getvalue(), # i. 이것만 안적혀있음. 뭐지?????? /21.3.26.16:11.
+                        # i. 이것만 출력안됨. 뭐지?????? /21.3.26.16:11. 
+                        # ->죠아래에서 pop해주잖아;; 이거 pop안해주면 json.dumps 안됨(TypeError: Object of type bytes is not JSON serializable). /21.3.26.18:40.
+                        "png_string": out.getvalue(), 
                         "segments_info": segments_info,
-
-                        "pred_annotation_testJ": "this_is_test_j", # i. 확인해보니 요건 잘 적혀있음. /21.3.26.16:09.
-                        "png_stringJ": out.getvalue(), # i. 테스트.
                     }
                 )
 
