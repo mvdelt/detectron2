@@ -119,6 +119,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             with io.BytesIO() as out:
                 Image.fromarray(id2rgb(panoptic_img)).save(out, format="PNG")
                 segments_info = [self._convert_category_id(x) for x in segments_info]
+
+                print(f'j) io.BytesIO() as out, out.getvalue(): {out.getvalue()}')
+
                 self._predictions.append(
                     {
                         "image_id": input["image_id"],
