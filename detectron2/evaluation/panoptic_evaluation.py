@@ -111,18 +111,22 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
-                panoptic_img += 1  
+                # panoptic_img += 1  
                 # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯. 
                 #  내플젝에선 백그라운드도 하나의 foreground 처럼 프레딕션해주고있는데(시각화를위해),
                 #  그 백그라운드의 id가 0이니까. self._predictions_json json파일(현재 내 구글드라이브에 저장되게해놨지) 열어보면
                 #  모델(panoptic deeplab)이 프레딕션한 결과가 어떻게 출력되었나 확인가능. /21.3.26.20:22.
+                # i.21.3.26.23:03) 참고로, 혹시나중에 까먹을까봐 적으면, 
+                #  보통은 panoptic seg 태스크에서 백그라운드는 프레딕션시 클래스 선택지에서 없게해줌. 그게 평가방식상 점수 유리하니까. coco 나 cityscapes 의 panoptic seg 평가시.
+                #  그래서 시각화시키면 백그라운드가 없음. 백그라운드도 전부 foreground 클래스들이 죄다 덮어버림(그래도 점수 안깎임).
+                #  근데 나는 시각화출력시에 백그라운드도 보여줘야 예쁘니까 백그라운드도 foreground 클래스중 하나로 해준거고.
 
             # else:
                 # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 얜 출력안되고있음. /21.3.26.16:06.
                 # print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 있음!!!!!!')
 
-            file_name = os.path.basename(input["file_name"])
-            file_name_png = os.path.splitext(file_name)[0] + ".png"
+            file_name = os.path.basename(input["file_name"]) # i. ex) (하나의 input 에서) 'file_name': '/content/datasetsJ/panopticSeg_dentPanoJ/inputOriPano/val/imp4_188.jpg' /21.3.26.22:49.
+            file_name_png = os.path.splitext(file_name)[0] + ".png" # i. ex) imp4_188.png 이런식으로 되겠지. /21.3.26.22:49.
             with io.BytesIO() as out:
                 Image.fromarray(id2rgb(panoptic_img)).save(out, format="PNG")
                 segments_info = [self._convert_category_id(x) for x in segments_info]
@@ -131,10 +135,10 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
                 self._predictions.append(
                     {
-                        "image_id": input["image_id"],
-                        "file_name": file_name_png,
+                        "image_id": input["image_id"], # i. ex) 'imp4_188' /21.3.26.22:52.
+                        "file_name": file_name_png, # i. ex) imp4_188.png /21.3.26.22:49.
                         # i. 이것만 출력안됨. 뭐지?????? /21.3.26.16:11. 
-                        # ->죠아래에서 pop해주잖아;; 이거 pop안해주면 json.dumps 안됨(TypeError: Object of type bytes is not JSON serializable). /21.3.26.18:40.
+                        # ->죠아래에서 pop 해주잖아;; 이거 pop 안해주면 json.dumps 안됨(TypeError: Object of type bytes is not JSON serializable). /21.3.26.18:40.
                         "png_string": out.getvalue(), 
                         "segments_info": segments_info,
                     }
@@ -170,10 +174,10 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
             with contextlib.redirect_stdout(io.StringIO()):
                 pq_res = pq_compute(
-                    gt_json,
-                    PathManager.get_local_path(self._predictions_json),
-                    gt_folder=gt_folder,
-                    pred_folder=pred_dir,
+                    gt_json, # i. COCO형식으로 변환된 어노json파일 경로. /21.3.26.22:41.
+                    PathManager.get_local_path(self._predictions_json), # i. 모델(현재 panoptic deeplab)의 출력 json 경로.(위에서 gt_json 의 "annotations"를 바꿔서 만들어줬지.) /21.3.26.22:42.
+                    gt_folder=gt_folder, # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리. /21.3.26.22:55.
+                    pred_folder=pred_dir, # i. 모델이 출력한 png 들을 넣어준 디렉토리 경로. (현재 임시디렉토리로 되어있지. 참고로 위에서 각 픽셀값들에다 +1해줬지. 내플젝에선 +1필요없을듯하지만.) /21.3.26.23:06. 
                 )
 
         res = {}
