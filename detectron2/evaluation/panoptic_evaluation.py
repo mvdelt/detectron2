@@ -104,7 +104,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                             "isthing": bool(isthing), # i. 얘도 안적혀잇음........ 엥?? /21.3.26.16:12.
 
                             "pred_segInfo_testJ":"segInfo_testJ",
-                            "isthingJ": isthing,
+                            "isthingJ": bool(isthing),
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
