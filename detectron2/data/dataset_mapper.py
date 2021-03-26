@@ -135,8 +135,8 @@ class DatasetMapper:
             sem_seg_gt = None
 
         aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
-        transforms = self.augmentations(aug_input)
-        image, sem_seg_gt = aug_input.image, aug_input.sem_seg
+        transforms = self.augmentations(aug_input) # i. aug_input을 오그멘테이션리스트대로 쫙 트랜스폼시키고, 트랜스폼리스트를 반환. 내가 AugmentationList 클래스에 설명달아논거 참고. /21.3.26.12:27. 
+        image, sem_seg_gt = aug_input.image, aug_input.sem_seg # i. <-따라서 얘네는 트랜스폼이 적용된 녀석들임. /21.3.26.12:33.
 
         image_shape = image.shape[:2]  # h, w
         # Pytorch's dataloader is efficient on torch.Tensor due to shared-memory,

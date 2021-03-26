@@ -66,6 +66,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
     def process(self, inputs, outputs):
 
         print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
+        print(f'j) inputs: {inputs}')      
+        print(f'j) outputs: {outputs}') 
 
         from panopticapi.utils import id2rgb
 
@@ -73,6 +75,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             panoptic_img, segments_info = output["panoptic_seg"]
             panoptic_img = panoptic_img.cpu().numpy()
             if segments_info is None:
+
+                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+
                 # If "segments_info" is None, we assume "panoptic_img" is a
                 # H*W int32 image storing the panoptic_id in the format of
                 # category_id * label_divisor + instance_id. We reserve -1 for
@@ -97,6 +102,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     )
                 # Official evaluation script uses 0 for VOID label.
                 panoptic_img += 1
+
+            else:
+                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 있음!!!!!!')
 
             file_name = os.path.basename(input["file_name"])
             file_name_png = os.path.splitext(file_name)[0] + ".png"

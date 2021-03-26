@@ -261,7 +261,13 @@ class AugmentationList(Augmentation):
     def __call__(self, aug_input) -> Transform:
         tfms = []
         for x in self.augs:
-            tfm = x(aug_input)
+            # i. x는 Augmentation 객체. 이것의 __call__ 은 Transform 객체를 리턴하기도하지만, 인풋으로넣어준 AugInput 을 in-place로 트랜스폼시킴.
+            #  즉, 지금 이 객체(AugmentationList)가 들고있는 모든 오그멘테이션들(self.augs)이 
+            #  인풋으로넣어진 AugInput 에 순차적으로 쫙 적용되고, 그 트랜스폼리스트를 리턴. 
+            #  즉, 말그대로 오그멘테이션"리스트"인거임. 오그멘테이션객체 하나가 하는게 그냥 여러개가 된것뿐임.
+            #  하나의 오그멘테이션객체에 AugInput넣으면서 __call__해주면, 트랜스폼을 리턴하면서 AugInput을 트랜스폼시키는데,
+            #  지금 이 오그멘테이션리스트객체에 AugInput 넣으면서 __call__해주면, 트랜스폼리스트를 리턴하면서 AugInput을 순차적으로 쫙 트랜스폼시키는거지. /21.3.26.12:06.
+            tfm = x(aug_input) 
             tfms.append(tfm)
         return TransformList(tfms)
 
