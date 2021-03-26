@@ -67,9 +67,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
     def process(self, inputs, outputs):
 
         print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
-        print(f'j) inputs: {inputs}')      
+        # print(f'j) inputs: {inputs}')      
         print(f'j) len(inputs): {len(inputs)}')      # 1  (예상대로임. 테스트시에는 뱃치사이즈가 1이라고 어디서 봤음.)
-        print(f'j) outputs: {outputs}') 
+        # print(f'j) outputs: {outputs}') 
         print(f'j) len(outputs): {len(outputs)}')    # 1
 
         from panopticapi.utils import id2rgb
