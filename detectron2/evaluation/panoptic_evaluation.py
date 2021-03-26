@@ -68,7 +68,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
         print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
         print(f'j) inputs: {inputs}')      
+        print(f'j) len(inputs): {len(inputs)}')      
         print(f'j) outputs: {outputs}') 
+        print(f'j) len(outputs): {len(outputs)}') 
 
         from panopticapi.utils import id2rgb
 
