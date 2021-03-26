@@ -185,12 +185,12 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         # https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py # noqa
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
 
-        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png"))
+        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png"))
         # i.21.3.24.20:34) 바로 위 한줄을 바로아래한줄로 내가 변경해줬음. 잘 되나 모름. 해보는중.
         #  (cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py 에 설명 나오니까 보삼. 아직 제대로 안읽어봄.)
         #  암튼, 원래코드는 ~~labelIds.png 를 이용했는데, 이게 인스턴스id 가 아니고 카테고리id임.
         #  ~~labelTrainIds.png 도 마찬가지로 카테고리id인데, train 용도의 카테고리id 인것 뿐이니까 이거 사용해도 될것으로 생각됨.
-        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
+        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
 
         assert len(
             groundTruthImgList

@@ -79,8 +79,14 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             panoptic_img = panoptic_img.cpu().numpy()
             if segments_info is None:
 
-                # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 이거 출력됨. /21.3.26.16:06.
+                # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 아래의 print 가 출력됨. /21.3.26.16:06.
                 # print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!') 
+                #
+                # i.21.3.26.21:42) ->즉, 바로아래의 Det2 기존 코멘트 설명대로일거임 아마도. 
+                #  즉, 아래에서의 panoptic_label 변수(이게 모델(panoptic deeplab)이 출력한 정보인거지)는
+                #  그냥 단순히 category_id * label_divisor + instance_id 로 계산된것인듯.
+                #  그래서, self._predictions_json json파일(현재 내 구글드라이브에 저장되게해놨지) 열어보면
+                #  cityscapes 의 방식이랑 좀 다른것을 볼수있음. 
 
                 # If "segments_info" is None, we assume "panoptic_img" is a
                 # H*W int32 image storing the panoptic_id in the format of
@@ -105,7 +111,11 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
-                panoptic_img += 1
+                panoptic_img += 1  
+                # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯. 
+                #  내플젝에선 백그라운드도 하나의 foreground 처럼 프레딕션해주고있는데(시각화를위해),
+                #  그 백그라운드의 id가 0이니까. self._predictions_json json파일(현재 내 구글드라이브에 저장되게해놨지) 열어보면
+                #  모델(panoptic deeplab)이 프레딕션한 결과가 어떻게 출력되었나 확인가능. /21.3.26.20:22.
 
             # else:
                 # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 얜 출력안되고있음. /21.3.26.16:06.
