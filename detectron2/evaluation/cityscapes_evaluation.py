@@ -196,6 +196,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         assert len(
             groundTruthImgList
         ), "Cannot find any ground truth images to use for evaluation. Searched for: {}".format(
+            # i.21.3.26.21:52) 코드작성자의 실수인듯. 이렇게하면 바로위의 groundTruthImgList 랑 값 다를수있는데. 일단 걍 냅두자.
             cityscapes_eval.args.groundTruthSearch
         )
         predictionImgList = []
