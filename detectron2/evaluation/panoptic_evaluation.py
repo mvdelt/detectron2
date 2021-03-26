@@ -127,7 +127,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         "segments_info": segments_info,
 
                         "pred_annotation_testJ": "this_is_test_j", # i. 확인해보니 요건 잘 적혀있음. /21.3.26.16:09.
-                        "png_string": out.getvalue(), # i. 테스트.
+                        "png_stringJ": out.getvalue(), # i. 테스트.
                     }
                 )
 
