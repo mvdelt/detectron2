@@ -104,7 +104,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                             "isthing": bool(isthing), # i. 얘도 안적혀잇음........ 엥?? /21.3.26.16:12.
 
                             "pred_segInfo_testJ":"segInfo_testJ",
-                            "isthingJ": bool(isthing),
+                            "isthingJ": bool(isthing), # i. 테스트. 얜 또 적힘... 뭐지?????????? /21.3.26.16:27.
                         }
                     )
                 # Official evaluation script uses 0 for VOID label.
@@ -127,6 +127,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         "segments_info": segments_info,
 
                         "pred_annotation_testJ": "this_is_test_j", # i. 확인해보니 요건 잘 적혀있음. /21.3.26.16:09.
+                        "png_string": out.getvalue(), # i. 테스트.
                     }
                 )
 
