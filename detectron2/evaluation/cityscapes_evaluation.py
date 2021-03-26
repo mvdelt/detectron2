@@ -37,7 +37,7 @@ class CityscapesEvaluator(DatasetEvaluator):
         # All workers will write to the same results directory
         # TODO this does not work in distributed training
         self._temp_dir = comm.all_gather(self._temp_dir)[0]
-        print(f'j) in CityscapesEvaluator.reset,  comm.all_gather(self._temp_dir): {comm.all_gather(self._temp_dir)}')
+        # print(f'j) in CityscapesEvaluator.reset,  comm.all_gather(self._temp_dir): {comm.all_gather(self._temp_dir)}')
         if self._temp_dir != self._working_dir.name:
             self._working_dir.cleanup()
         self._logger.info(
@@ -57,7 +57,7 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
 
     def process(self, inputs, outputs):
 
-        print('j) CityscapesInstanceEvaluator.process starts!!! ~~~~~~~~~~~')
+        # print('j) CityscapesInstanceEvaluator.process starts!!! ~~~~~~~~~~~')
 
         from cityscapesscripts.helpers.labels import name2label
 
@@ -95,7 +95,7 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
             dict: has a key "segm", whose value is a dict of "AP" and "AP50".
         """
         
-        print('j) CityscapesInstanceEvaluator.evaluate starts!!! ~~~~~~~~~~~')
+        # print('j) CityscapesInstanceEvaluator.evaluate starts!!! ~~~~~~~~~~~')
 
         comm.synchronize()
         if comm.get_rank() > 0:
@@ -145,7 +145,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
 
     def process(self, inputs, outputs):
         
-        print('j) CityscapesSemSegEvaluator.process starts!!! ~~~~~~~~~~~')
+        # print('j) CityscapesSemSegEvaluator.process starts!!! ~~~~~~~~~~~')
 
         from cityscapesscripts.helpers.labels import trainId2label
 
@@ -164,7 +164,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
 
     def evaluate(self):
         
-        print('j) CityscapesSemSegEvaluator.evaluate starts!!! ~~~~~~~~~~~')
+        # print('j) CityscapesSemSegEvaluator.evaluate starts!!! ~~~~~~~~~~~')
 
         comm.synchronize()
         if comm.get_rank() > 0:
@@ -199,7 +199,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         )
         predictionImgList = []
         for gt in groundTruthImgList:
-            print('j) gt in groundTruthImgList . . . . . . . . . . . . . . .')
+            # print('j) gt in groundTruthImgList . . . . . . . . . . . . . . .')
             # i.21.3.24.21:14) ######################### 지금하고있는부분!! 코랩 돌리면 여기서 에러남!!!
             predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt))
         results = cityscapes_eval.evaluateImgLists(

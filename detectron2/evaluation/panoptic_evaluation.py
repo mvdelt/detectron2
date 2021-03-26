@@ -66,13 +66,13 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
     def process(self, inputs, outputs):
 
-        print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
+        # print('j) COCOPanopticEvaluator.process starts!!! cococococococococococococococococo')
         # print(f'j) inputs: {inputs}')      
-        print(f'j) len(inputs): {len(inputs)}')      # 1  (예상대로임. 테스트시에는 뱃치사이즈가 1이라고 어디서 봤음.)
+        # print(f'j) len(inputs): {len(inputs)}')      # 1  (예상대로임. 테스트시에는 뱃치사이즈가 1이라고 어디서 봤음.)
         # print(f'j) outputs: {outputs}') 
-        print(f'j) len(outputs): {len(outputs)}')    # 1
+        # print(f'j) len(outputs): {len(outputs)}')    # 1
 
-        from panopticapi.utils import id2rgb
+        from panopticapi.utils import id2rgb 
 
         for input, output in zip(inputs, outputs):
             panoptic_img, segments_info = output["panoptic_seg"]
@@ -80,7 +80,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             if segments_info is None:
 
                 # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 이거 출력됨. /21.3.26.16:06.
-                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!') 
+                # print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 없음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!') 
 
                 # If "segments_info" is None, we assume "panoptic_img" is a
                 # H*W int32 image storing the panoptic_id in the format of
@@ -107,9 +107,9 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                 # Official evaluation script uses 0 for VOID label.
                 panoptic_img += 1
 
-            else:
+            # else:
                 # i. 현재 내플젝(panoptic deeplab 이용한 치과파노라마 panoptic seg 플젝) 에선 얜 출력안되고있음. /21.3.26.16:06.
-                print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 있음!!!!!!')
+                # print('j) (코드조사용 출력) 모델이내뱉은 아웃풋에 segments_info 가 있음!!!!!!')
 
             file_name = os.path.basename(input["file_name"])
             file_name_png = os.path.splitext(file_name)[0] + ".png"
@@ -117,7 +117,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                 Image.fromarray(id2rgb(panoptic_img)).save(out, format="PNG")
                 segments_info = [self._convert_category_id(x) for x in segments_info]
 
-                print(f'j) io.BytesIO() as out, out.getvalue(): {out.getvalue()}')
+                # print(f'j) io.BytesIO() as out, out.getvalue(): {out.getvalue()}')   # b'\x89PNG\r\n\x1a\n\x00\~~~~~~~~~~'  
 
                 self._predictions.append(
                     {
@@ -133,7 +133,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
     def evaluate(self):
         comm.synchronize()
 
-        print('j) COCOPanopticEvaluator.evaluate starts!!! cococococococococococococococococo')
+        # print('j) COCOPanopticEvaluator.evaluate starts!!! cococococococococococococococococo')
 
         self._predictions = comm.gather(self._predictions)
         self._predictions = list(itertools.chain(*self._predictions))
