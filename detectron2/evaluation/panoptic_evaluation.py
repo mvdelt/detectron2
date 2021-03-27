@@ -183,7 +183,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     gt_folder=gt_folder, # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리. /21.3.26.22:55.
                     pred_folder=pred_dir, # i. 모델이 출력한 png 들을 넣어준 디렉토리 경로. (현재 임시디렉토리로 되어있지. 참고로 위에서 각 픽셀값들에다 +1해줬지. 내플젝에선 +1필요없을듯하지만.) /21.3.26.23:06. 
                 )
-            print(f'j) got stdout: {ioJ.getvalue()}') 
+            print(f'j) got stdout: \n{ioJ.getvalue()}') 
 
         res = {}
         res["PQ"] = 100 * pq_res["All"]["pq"]
