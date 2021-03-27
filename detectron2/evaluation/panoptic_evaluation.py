@@ -139,7 +139,7 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                         "image_id": input["image_id"], # i. ex) 'imp4_188' /21.3.26.22:52.
                         "file_name": file_name_png, # i. ex) imp4_188.png /21.3.26.22:49.
                         # i. 이것만 출력안됨. 뭐지?????? /21.3.26.16:11. 
-                        # ->죠아래에서 pop 해주잖아;; 이거 pop 안해주면 json.dumps 안됨(TypeError: Object of type bytes is not JSON serializable). /21.3.26.18:40.
+                        #  ->죠아래에서 pop 해주잖아;; 이거 pop 안해주면 json.dumps 안됨(TypeError: Object of type bytes is not JSON serializable). /21.3.26.18:40.
                         "png_string": out.getvalue(), 
                         "segments_info": segments_info,
                     }
@@ -156,8 +156,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
             return
 
         # PanopticApi requires local files
-        gt_json = PathManager.get_local_path(self._metadata.panoptic_json) # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26.
-        gt_folder = PathManager.get_local_path(self._metadata.panoptic_root) # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26.
+        gt_json = PathManager.get_local_path(self._metadata.panoptic_json) # i. COCO형식으로 변환된 어노json파일 경로./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26. 
+        gt_folder = PathManager.get_local_path(self._metadata.panoptic_root) # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리./21.3.10.12:02.에적어뒀던것. /21.3.26.13:26. 
 
         with tempfile.TemporaryDirectory(prefix="panoptic_eval") as pred_dir:
             logger.info("Writing all panoptic predictions to {} ...".format(pred_dir))
