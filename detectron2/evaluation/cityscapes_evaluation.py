@@ -154,8 +154,8 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             basename = os.path.splitext(os.path.basename(file_name))[0]
             pred_filename = os.path.join(self._temp_dir, basename + "_pred.png")
 
-            output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy()
-            pred = 255 * np.ones(output.shape, dtype=np.uint8)
+            output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy() # i. TODO 이부분 조사아직못함. /21.3.27.21:30.
+            pred = 255 * np.ones(output.shape, dtype=np.uint8) # i. 1 들로 채우네. 상관없나? 어차피 모든영역 다 그려주나? TODO output["sem_seg"] 가 뭔지 조사필요. /21.3.27.21:30.
             for train_id, label in trainId2label.items():
                 if label.ignoreInEval:
                     continue
@@ -196,7 +196,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         assert len(
             groundTruthImgList
         ), "Cannot find any ground truth images to use for evaluation. Searched for: {}".format(
-            # i.21.3.26.21:52) 코드작성자의 실수인듯. 이렇게하면 바로위의 groundTruthImgList 랑 값 다를수있는데. 일단 걍 냅두자.
+            # i.21.3.26.21:52) 왜 이걸써놨지..? 코드작성자의 실수인듯. 이렇게하면 바로위의 groundTruthImgList 랑 값 다를수있는데. 일단 걍 냅두자. 
             cityscapes_eval.args.groundTruthSearch
         )
         predictionImgList = []
