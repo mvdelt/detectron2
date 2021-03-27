@@ -105,7 +105,8 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     )
                     segments_info.append(
                         {
-                            "id": int(panoptic_label) + 1,
+                            # "id": int(panoptic_label) + 1,  # i. TODO 내플젝할때는 +1 제거해야함 /21.3.27.14:21.
+                            "id": int(panoptic_label),        # i. 내플젝 위해 +1 제거. /21.3.27.14:19. 
                             "category_id": int(pred_class),
                             "isthing": bool(isthing), # i. 얘도 안적혀잇음...엥?? /21.3.26.16:12. ->_convert_category_id 에서 pop해주자나;;; /21.3.26.18:40.
                         }
