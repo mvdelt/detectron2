@@ -72,7 +72,7 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
                 with open(pred_txt, "w") as fout:
                     for i in range(num_instances):
                         pred_class = output.pred_classes[i]
-                        classes = self._metadata.thing_classes[pred_class]
+                        classes = self._metadata.thing_classes[pred_class] # i. classes 는 카테고리명. ex: "sinus" 또는 "t_normal" 등.
                         class_id = name2label[classes].id
                         score = output.scores[i]
                         mask = output.pred_masks[i].numpy().astype("uint8")
@@ -85,6 +85,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
                             "{} {} {}\n".format(os.path.basename(png_filename), class_id, score)
                         )
             else:
+
+                raise KeyError("j) 내플젝에선 이것이 프린트되지 않을거임!!!!!!!") # i. 코드조사. /21.3.28.13:50. 
+
                 # Cityscapes requires a prediction file for every ground truth image.
                 with open(pred_txt, "w") as fout:
                     pass
@@ -114,15 +117,40 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         # These lines are adopted from
         # https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/evaluation/evalInstanceLevelSemanticLabeling.py # noqa
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
-        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_instanceIds.png"))
+
+        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_instanceIds.png")) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:17. 
+        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
+
         assert len(
             groundTruthImgList
         ), "Cannot find any ground truth images to use for evaluation. Searched for: {}".format(
             cityscapes_eval.args.groundTruthSearch
         )
+
+
+
+        # i.21.3.28.12:12) 바로아래에서 이용하는 cityscapesscripts.evaluation.evalInstanceLevelSemanticLabeling 의 getPrediction 함수 대신 사용해줄,
+        #  내가만든 getPredictionJ 함수. (똑같은 일을 하는데, 내플젝에 맞게 만든거임. 하는일은 매우 단순.)
+        #  참고로, evalInstanceLevelSemanticLabeling 의 getPrediction 함수는 evalPixelLevelSemanticLabeling 의 getPrediction 과는 좀 다름.
+        #  따라서, 지금 이 getPredictionJ 도 CityscapesSemSegEvaluator 의 evaluate 에서 사용해주는 getPredictionJ 와는 좀 다름. 
+        def getPredictionJ(predTxtAndPngsDirpathJ, gtPngPathJ):
+            gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
+            imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
+            # i. 이 리스트의 원소는 딱 1개일거임. 특정 이미지id 에 대응되는 프레딕션결과txt 파일은 1개. 
+            #  참고로 프레딕션결과png파일은 각 이미지마다 해당 이미지의 인스턴스갯수만큼 생성되네. 바로위 process 보면. /21.3.28.14:07.
+            predTxtPath_listJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.txt")) 
+            assert len(predTxtPath_listJ)==1, "j) 원소가 1개여야하는데 뭔가 이상하네!!!" 
+            predTxtPathJ = predTxtPath_listJ[0] # i. 리스트의 원소 1개일거니까 그것을 꺼내줌. /21.3.28.14:07. 
+            print(f'j) predTxtPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.txt') 
+            print(f'j) predTxtPathJ: {predTxtPathJ}')
+            return predTxtPathJ
+
+
+
         predictionImgList = []
         for gt in groundTruthImgList:
-            predictionImgList.append(cityscapes_eval.getPrediction(gt, cityscapes_eval.args))
+            # predictionImgList.append(cityscapes_eval.getPrediction(gt, cityscapes_eval.args)) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:26. 
+            predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
         results = cityscapes_eval.evaluateImgLists(
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )["averages"]
@@ -201,15 +229,19 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             cityscapes_eval.args.groundTruthSearch
         )
 
-        # i.21.3.28.12:12) 바로아래서 이용하는 cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling 의 getPrediction 함수 대신 사용해줄,
+
+
+        # i.21.3.28.12:12) 밑에서 이용하는 cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling 의 getPrediction 함수 대신 사용해줄,
         #  내가만든 getPredictionJ 함수. (똑같은 일을 하는데, 내플젝에 맞게 만든거임. 하는일은 매우 단순.)
         def getPredictionJ(predPngDirpathJ, gtPngPathJ):
             gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
-            imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impAAA_BBB"
-            predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"*"))[0]
+            imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
+            predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
             print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impAAA_BBB_pred.png') 
             print(f'j) predPngPathJ: {predPngPathJ}')
             return predPngPathJ
+
+
 
         predictionImgList = []
         for gt in groundTruthImgList:
