@@ -105,15 +105,15 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     )
                     segments_info.append(
                         {
-                            "id": int(panoptic_label) + 1,  # i. TODO 내플젝할때는 +1 제거해야함 /21.3.27.14:21.
+                            "id": int(panoptic_label) + 1,  # i. TODO 내플젝할때는 +1 제거해야함 /21.3.27.14:21.  # i. ->다시생각해보니, 걍 +1을 해주든 +123을 해주든 상관없이 똑같을듯..?? 아직제대로생각완료못함. /21.3.28.12:59.
                             # "id": int(panoptic_label),        # i. 내플젝 위해 +1 제거. /21.3.27.14:19. 
                             "category_id": int(pred_class),
                             "isthing": bool(isthing), # i. 얘도 안적혀잇음...엥?? /21.3.26.16:12. ->_convert_category_id 에서 pop해주자나;;; /21.3.26.18:40.
                         }
                     )
-                # Official evaluation script uses 0 for VOID label.
+                # Official evaluation script uses 0 for VOID label.  # i. TODO 음.. 기존Det2코멘트가 틀린것같은데.. +1 해줄필요없을것같은데??? 내생각맞나테스트해보자. /21.3.28.13:09. 
                 panoptic_img += 1  
-                # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯. 
+                # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯.  # i. ->다시생각해보니, 걍 +1을 해주든 +123을 해주든 상관없이 똑같을듯..?? 아직제대로생각완료못함. /21.3.28.12:59. 
                 #  내플젝에선 백그라운드도 하나의 foreground 처럼 프레딕션해주고있는데(시각화를위해),
                 #  그 백그라운드의 id가 0이니까. self._predictions_json json파일(현재 내 구글드라이브에 저장되게해놨지) 열어보면
                 #  모델(panoptic deeplab)이 프레딕션한 결과가 어떻게 출력되었나 확인가능. /21.3.26.20:22.
