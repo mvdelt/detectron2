@@ -199,7 +199,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             return
         # Load the Cityscapes eval script *after* setting the required env var,
         # since the script reads CITYSCAPES_DATASET into global variables at load time.
-        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling as cityscapes_eval
+        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabelingJ as cityscapes_eval 
 
         self._logger.info("Evaluating results under {} ...".format(self._temp_dir))
 
