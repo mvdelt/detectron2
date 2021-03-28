@@ -186,13 +186,13 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
 
         # i. 원소 하나 예시: ~~/cityscapes/gtFine/val/frankfurt/frankfurt_000000_000294_gtFine_labelIds.png /21.3.28.9:48. 
-        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png")) 
+        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png")) 
         # i. TODO 내플젝 할때는 위 한줄 코멘트아웃하고 아래의 내 코드 한줄을 살려줘야함. /21.3.26.21:51. 
         # i.21.3.24.20:34) 위 한줄을 바로아래한줄로 내가 변경해줬음. 잘 되나 모름. 해보는중.
         #  (cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py 에 설명 나오니까 보삼. 아직 제대로 안읽어봄.)
         #  암튼, 원래코드는 ~~labelIds.png 를 이용했는데, 이게 인스턴스id 가 아니고 카테고리id임.
         #  ~~labelTrainIds.png 도 마찬가지로 카테고리id인데, train 용도의 카테고리id 인것 뿐이니까 이거 사용해도 될것으로 생각됨.
-        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
+        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
 
         assert len(
             groundTruthImgList
@@ -200,11 +200,34 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             # i.21.3.26.21:52) 왜 이걸써놨지..? 코드작성자의 실수인듯. 이렇게하면 바로위의 groundTruthImgList 랑 값 다를수있는데. 일단 걍 냅두자. 
             cityscapes_eval.args.groundTruthSearch
         )
+
+        # i.21.3.28.12:12) 바로아래서 이용하는 cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling 의 getPrediction 함수 대신 사용해줄,
+        #  내가만든 getPredictionJ 함수. (똑같은 일을 하는데, 내플젝에 맞게 만든거임. 하는일은 매우 단순.)
+        def getPredictionJ(predPngDirpathJ, gtPngPathJ):
+            gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
+            imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impAAA_BBB"
+            predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"*"))[0]
+            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impAAA_BBB_pred.png') 
+            print(f'j) predPngPathJ: {predPngPathJ}')
+            return predPngPathJ
+
         predictionImgList = []
         for gt in groundTruthImgList:
             # print('j) gt in groundTruthImgList . . . . . . . . . . . . . . .')
             # i.21.3.24.21:14) ######################### 지금하고있는부분!! 코랩 돌리면 여기서 에러남!!!
-            predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt))
+            # i.21.3.28.11:49) getPrediction 함수가 하는일은 매우 간단함.
+            #  gt png파일 경로를 넣어주면 그에 해당하는 프레딕션결과파일(죠위에 process에서 만들어준)의 경로를 리턴해주는것 뿐. 
+            #  (죠 위의 process에서 프레딕션결과png파일들 만들어서 임시폴더에 저장해논상태고, 그 임시폴더의 경로가 cityscapes_eval.args.predictionPath 에 할당되어있지.) 
+            #  getPrediction 함수의 두번째인풋 및 리턴값 예시: 
+            #  gt ex: ~~/cityscapes/gtFine/val/frankfurt/frankfurt_000000_000294_gtFine_labelIds.png 
+            #  리턴값 ex: '/임시/폴더의/경로/frankfurt_000000_000294_leftImg8bit_pred.png' 
+            #
+            #  따라서, 내플젝 적용할땐, getPrediction 함수 쓸필요없고(내플젝의 파일명 구조는 cityscapes 플젝의 파일명 구조처럼 복잡하지 않으니), 
+            #  걍 간단한 방법으로 gt(하나의 gt png파일의 경로)에 대한 프레딕션결과png파일의 경로를 찾아서 predictionImgList 에 append 해주면 됨.
+            #  음.. 간단한로직이긴한데 걍 getPredictionJ 라는 함수 만들어서 해야겠다.
+            #
+            # predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt)) # TODO 내플젝돌릴땐 이거말고 아래의 코드(getPredictionJ 함수 이용하는) 사용해야함. /21.3.28.12:11.
+            predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
         results = cityscapes_eval.evaluateImgLists(
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )
