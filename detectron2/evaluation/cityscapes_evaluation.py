@@ -185,6 +185,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         # https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py # noqa
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
 
+        # i. 원소 하나 예시: ~~/cityscapes/gtFine/val/frankfurt/frankfurt_000000_000294_gtFine_labelIds.png /21.3.28.9:48. 
         groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png")) 
         # i. TODO 내플젝 할때는 위 한줄 코멘트아웃하고 아래의 내 코드 한줄을 살려줘야함. /21.3.26.21:51. 
         # i.21.3.24.20:34) 위 한줄을 바로아래한줄로 내가 변경해줬음. 잘 되나 모름. 해보는중.
