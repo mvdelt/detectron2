@@ -237,7 +237,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
             imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
             predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
-            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impAAA_BBB_pred.png') 
+            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
             print(f'j) predPngPathJ: {predPngPathJ}')
             return predPngPathJ
 
@@ -261,6 +261,12 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             # predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt)) # TODO 내플젝돌릴땐 이거말고 아래의 코드(getPredictionJ 함수 이용하는) 사용해야함. /21.3.28.12:11.
             predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
         results = cityscapes_eval.evaluateImgLists(
+            # i.21.3.29.0:39) predictionImgList 는 말그대로 모델이 프레딕션한, *인스턴스id* 들이 그려진 png의 경로들의 리스트인 반면,
+            #  groundTruthImgList 는 인스턴스id 가 아닌 ~~_labelTrainIds.png 즉 *클래스id(카테고리id)* 가 그려진 png의 경로들의 리스트임.
+            #  (참고로, 일반적으로는 클래스라는 표현이나 카테고리라는 표현이나 똑같은의미로 쓰이는데, 
+            #   cityscapes 의 labels.py 에서는 'category' 가 슈퍼카테고리를 의미함. 
+            #   예를들어 차,자전거 등을 모두 vehicle 이라고한다면 vehicle 이 슈퍼카테고리일건데 
+            #   이걸 cityscapes 에서는 'category' 라고 한다는거지. 나중에 헷갈릴까봐 적어둠.)
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )
         ret = OrderedDict()
