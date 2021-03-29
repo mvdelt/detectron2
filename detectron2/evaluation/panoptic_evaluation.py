@@ -75,7 +75,15 @@ class COCOPanopticEvaluator(DatasetEvaluator):
         from panopticapi.utils import id2rgb 
 
         for input, output in zip(inputs, outputs):
-            panoptic_img, segments_info = output["panoptic_seg"]
+            # i.21.3.29.21:26) 
+            #  여기(COCOPanopticEvaluator)서는 output["panoptic_seg"] 를 이용한다!! 
+            #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
+            #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용함!! 
+            #  Det2 문서의 모델 아웃풋 부분 보면, 모델의 아웃풋인 list[dict] 의 각 dict(하나의 이미지에 대응)가 가질수있는 키들 중 
+            #  이렇게 3가지("instances", "sem_seg", "panoptic_seg") 가 주요 키들임. 
+            #  Det2 내장 panoptic deeplab 플젝의 train_net.py 의 Trainer.build_evaluator 메서드 보면 
+            #  이 3개의 이밸류에이터(DatasetEvaluator 클래스) 를 리스트에 담아서 DatasetEvaluator's' 로 만들어주고있지. 
+            panoptic_img, segments_info = output["panoptic_seg"] 
             panoptic_img = panoptic_img.cpu().numpy()
             if segments_info is None:
 

@@ -15,6 +15,8 @@ from detectron2.utils.file_io import PathManager
 from .evaluator import DatasetEvaluator
 
 
+
+
 class CityscapesEvaluator(DatasetEvaluator):
     """
     Base class for evaluation using cityscapes API.
@@ -45,6 +47,9 @@ class CityscapesEvaluator(DatasetEvaluator):
         )
 
 
+
+
+
 class CityscapesInstanceEvaluator(CityscapesEvaluator):
     """
     Evaluate instance segmentation results on cityscapes dataset using cityscapes API.
@@ -66,6 +71,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
             basename = os.path.splitext(os.path.basename(file_name))[0]
             pred_txt = os.path.join(self._temp_dir, basename + "_pred.txt")
 
+            #  COCOPanopticEvaluator 에선 output["panoptic_seg"] 를,
+            #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
+            #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용. COCOPanopticEvaluator 에 내가 적어놓은것 참고. /21.3.29.22:20. 
             if "instances" in output:
                 output = output["instances"].to(self._cpu_device)
                 num_instances = len(output)
@@ -128,7 +136,6 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         )
 
 
-
         # i.21.3.28.12:12) 바로아래에서 이용하는 cityscapesscripts.evaluation.evalInstanceLevelSemanticLabeling 의 getPrediction 함수 대신 사용해줄,
         #  내가만든 getPredictionJ 함수. (똑같은 일을 하는데, 내플젝에 맞게 만든거임. 하는일은 매우 단순.)
         #  참고로, evalInstanceLevelSemanticLabeling 의 getPrediction 함수는 evalPixelLevelSemanticLabeling 의 getPrediction 과는 좀 다름.
@@ -146,7 +153,6 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
             return predTxtPathJ
 
 
-
         predictionImgList = []
         for gt in groundTruthImgList:
             # predictionImgList.append(cityscapes_eval.getPrediction(gt, cityscapes_eval.args)) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:26. 
@@ -159,6 +165,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         ret["segm"] = {"AP": results["allAp"] * 100, "AP50": results["allAp50%"] * 100}
         self._working_dir.cleanup()
         return ret
+
+
+
 
 
 class CityscapesSemSegEvaluator(CityscapesEvaluator):
@@ -182,12 +191,18 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             basename = os.path.splitext(os.path.basename(file_name))[0]
             pred_filename = os.path.join(self._temp_dir, basename + "_pred.png")
 
-            output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy() # i. TODO 이부분 조사아직못함. /21.3.27.21:30.
-            pred = 255 * np.ones(output.shape, dtype=np.uint8) # i. 1 들로 채우네. 상관없나? 어차피 모든영역 다 그려주나? TODO output["sem_seg"] 가 뭔지 조사필요. /21.3.27.21:30.
+            #  COCOPanopticEvaluator 에선 output["panoptic_seg"] 를,
+            #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
+            #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용. COCOPanopticEvaluator 에 내가 적어놓은것 참고. /21.3.29.22:20. 
+            output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy() # i. vTODO 이부분 조사아직못함. /21.3.27.21:30. ->이해완료. Det2 문서 모델 아웃풋 부분 참고. /21.3.29.20:57. 
+            pred = 255 * np.ones(output.shape, dtype=np.uint8) # i. 1 들로 채우네. 상관없나? 어차피 모든영역 다 그려주나? vTODO output["sem_seg"] 가 뭔지 조사필요. /21.3.27.21:30.
+            # i. -> 1이아니고 255로 채우는거잖아;; /21.3.29.21:16.
             for train_id, label in trainId2label.items():
                 if label.ignoreInEval:
                     continue
-                pred[output == train_id] = label.id
+                # i.21.3.29.23:31) 여기선 label.id 로 그려줬지만, 필요에따라 label.trainId 로 그려줘야할수도있지. 내플젝이 그렇지(내플젝에선 현재는 label.id 랑 label.trainId 가 같아서 상관없지만). 
+                #  (참고로, 내가 '그려'준다는 표현을 쓰고있는데, 이미지의 각 픽셀값을 id 등의 값으로 정해주고있어서 '그린다'는 표현을 쓰고있는중임.) 
+                pred[output == train_id] = label.id 
             Image.fromarray(pred).save(pred_filename)
 
     def evaluate(self):
@@ -260,13 +275,17 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             #
             # predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt)) # TODO 내플젝돌릴땐 이거말고 아래의 코드(getPredictionJ 함수 이용하는) 사용해야함. /21.3.28.12:11.
             predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
-        results = cityscapes_eval.evaluateImgLists(
-            # i.21.3.29.0:39) predictionImgList 는 말그대로 모델이 프레딕션한, *인스턴스id* 들이 그려진 png의 경로들의 리스트인 반면,
-            #  groundTruthImgList 는 인스턴스id 가 아닌 ~~_labelTrainIds.png 즉 *클래스id(카테고리id)* 가 그려진 png의 경로들의 리스트임.
+        results = cityscapes_eval.evaluateImgLists( 
+            # i.21.3.29.0:39) -> # i.21.3.29.22:49) 잘못알던부분 수정 (pred 나 gt 나 둘다 클래스id 들을 담고있음). 
+            #  predictionImgList 는 모델이 프레딕션한 클래스id (label.trainId 말고 그냥 label.id) 들이 그려져있고 VOID는 255로 그려진 
+            #  png 의 경로들의 리스트임.(모델의 인퍼런스 아웃풋에서 각 이미지에해당하는 dict 의 "sem_seg" 의 정보에 따라 그려준것임.) 
+            #  groundTruthImgList 는 내플젝의경우 ~~_labelTrainIds.png 즉 클래스id(인데 train용 id (trainId)) 가 그려진 gt png 의 경로들의 리스트임. 
+            #  (내플젝에선 현재는 label.trainId 랑 label.id 랑 똑같기때문에 상관없음. 
+            #   만약 달랐으면, gt 로 사용할 ~~_labelIds.png 를 만들어주든지, 아니면 모델이 프레딕션한거 png 로 그려줄때 label.trainId 로 그려주면 되지.) 
             #  (참고로, 일반적으로는 클래스라는 표현이나 카테고리라는 표현이나 똑같은의미로 쓰이는데, 
             #   cityscapes 의 labels.py 에서는 'category' 가 슈퍼카테고리를 의미함. 
             #   예를들어 차,자전거 등을 모두 vehicle 이라고한다면 vehicle 이 슈퍼카테고리일건데 
-            #   이걸 cityscapes 에서는 'category' 라고 한다는거지. 나중에 헷갈릴까봐 적어둠.)
+            #   이걸 cityscapes 에서는 'category' 라고 한다는거지. 나중에 헷갈릴까봐 적어둠.) 
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )
         ret = OrderedDict()

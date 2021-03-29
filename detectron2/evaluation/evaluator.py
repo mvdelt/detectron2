@@ -132,7 +132,9 @@ def inference_on_dataset(model, data_loader, evaluator):
     start_time = time.perf_counter()
     total_compute_time = 0
     with inference_context(model), torch.no_grad():
-        for idx, inputs in enumerate(data_loader):
+        # i. Det2 에서 이밸류에이션시 사용하는 기본 데이터로더(build_detection_test_loader)의 뱃치사이즈는 1임. 
+        #  Det2 내장 panoptic deeplab 플젝도 그대로 그렇게 해주고있음. /21.3.29.22:15. 
+        for idx, inputs in enumerate(data_loader): 
             if idx == num_warmup:
                 start_time = time.perf_counter()
                 total_compute_time = 0
