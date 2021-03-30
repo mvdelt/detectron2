@@ -75,7 +75,15 @@ class COCOPanopticEvaluator(DatasetEvaluator):
         from panopticapi.utils import id2rgb 
 
         for input, output in zip(inputs, outputs):
-            panoptic_img, segments_info = output["panoptic_seg"]
+            # i.21.3.29.21:26) 
+            #  여기(COCOPanopticEvaluator)서는 output["panoptic_seg"] 를 이용한다!! 
+            #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
+            #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용함!! 
+            #  Det2 문서의 모델 아웃풋 부분 보면, 모델의 아웃풋인 list[dict] 의 각 dict(하나의 이미지에 대응)가 가질수있는 키들 중 
+            #  이렇게 3가지("instances", "sem_seg", "panoptic_seg") 가 주요 키들임. 
+            #  Det2 내장 panoptic deeplab 플젝의 train_net.py 의 Trainer.build_evaluator 메서드 보면 
+            #  이 3개의 이밸류에이터(DatasetEvaluator 클래스) 를 리스트에 담아서 DatasetEvaluator's' 로 만들어주고있지. 
+            panoptic_img, segments_info = output["panoptic_seg"] 
             panoptic_img = panoptic_img.cpu().numpy()
             if segments_info is None:
 
@@ -105,15 +113,15 @@ class COCOPanopticEvaluator(DatasetEvaluator):
                     )
                     segments_info.append(
                         {
-                            # "id": int(panoptic_label) + 1,  # i. TODO 내플젝할때는 +1 제거해야함 /21.3.27.14:21.
-                            "id": int(panoptic_label),        # i. 내플젝 위해 +1 제거. /21.3.27.14:19. 
+                            "id": int(panoptic_label) + 1,  # i. TODO 내플젝할때는 +1 제거해야함 /21.3.27.14:21.  # i. ->다시생각해보니, 걍 +1을 해주든 +123을 해주든 상관없이 똑같을듯..?? 아직제대로생각완료못함. /21.3.28.12:59.
+                            # "id": int(panoptic_label),        # i. 내플젝 위해 +1 제거. /21.3.27.14:19. 
                             "category_id": int(pred_class),
                             "isthing": bool(isthing), # i. 얘도 안적혀잇음...엥?? /21.3.26.16:12. ->_convert_category_id 에서 pop해주자나;;; /21.3.26.18:40.
                         }
                     )
-                # Official evaluation script uses 0 for VOID label.
-                # panoptic_img += 1  
-                # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯. 
+                # Official evaluation script uses 0 for VOID label.  # i. TODO 음.. 기존Det2코멘트가 틀린것같은데.. +1 해줄필요없을것같은데??? 내생각맞나테스트해보자. /21.3.28.13:09. 
+                panoptic_img += 1  
+                # i. TODO ->내플젝에선 이거(panoptic_img += 1) 코멘트아웃해주면 될듯.  # i. ->다시생각해보니, 걍 +1을 해주든 +123을 해주든 상관없이 똑같을듯..?? 아직제대로생각완료못함. /21.3.28.12:59. 
                 #  내플젝에선 백그라운드도 하나의 foreground 처럼 프레딕션해주고있는데(시각화를위해),
                 #  그 백그라운드의 id가 0이니까. self._predictions_json json파일(현재 내 구글드라이브에 저장되게해놨지) 열어보면
                 #  모델(panoptic deeplab)이 프레딕션한 결과가 어떻게 출력되었나 확인가능. /21.3.26.20:22.
@@ -173,13 +181,17 @@ class COCOPanopticEvaluator(DatasetEvaluator):
 
             from panopticapi.evaluation import pq_compute
 
-            with contextlib.redirect_stdout(io.StringIO()):
+            # with contextlib.redirect_stdout(io.StringIO()):
+            # i.21.3.27.18:34) print 출력좀 확인하려고 내가 좀 바꿔줌.
+            ioJ = io.StringIO()
+            with contextlib.redirect_stdout(ioJ):
                 pq_res = pq_compute(
                     gt_json, # i. COCO형식으로 변환된 어노json파일 경로. /21.3.26.22:41.
                     PathManager.get_local_path(self._predictions_json), # i. 모델(현재 panoptic deeplab)의 출력 json 경로.(위에서 gt_json 의 "annotations"를 바꿔서 만들어줬지.) /21.3.26.22:42.
                     gt_folder=gt_folder, # i. COCO형식으로 변환된 어노png파일들 있는 디렉토리. /21.3.26.22:55.
                     pred_folder=pred_dir, # i. 모델이 출력한 png 들을 넣어준 디렉토리 경로. (현재 임시디렉토리로 되어있지. 참고로 위에서 각 픽셀값들에다 +1해줬지. 내플젝에선 +1필요없을듯하지만.) /21.3.26.23:06. 
                 )
+            print(f'j) got stdout: \n{ioJ.getvalue()}') 
 
         res = {}
         res["PQ"] = 100 * pq_res["All"]["pq"]
