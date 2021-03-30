@@ -214,7 +214,8 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             return
         # Load the Cityscapes eval script *after* setting the required env var,
         # since the script reads CITYSCAPES_DATASET into global variables at load time.
-        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabelingJ as cityscapes_eval 
+        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling as cityscapes_eval # i. TODO: 내플젝할때는 바로아랫줄코드 이용해야함. /21.3.30.10:29.나중작성. 
+        # import cityscapesscripts.evaluation.evalPixelLevelSemanticLabelingJ as cityscapes_eval 
 
         self._logger.info("Evaluating results under {} ...".format(self._temp_dir))
 
@@ -279,6 +280,7 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             # i.21.3.29.0:39) -> # i.21.3.29.22:49) 잘못알던부분 수정 (pred 나 gt 나 둘다 클래스id 들을 담고있음). 
             #  predictionImgList 는 모델이 프레딕션한 클래스id (label.trainId 말고 그냥 label.id) 들이 그려져있고 VOID는 255로 그려진 
             #  png 의 경로들의 리스트임.(모델의 인퍼런스 아웃풋에서 각 이미지에해당하는 dict 의 "sem_seg" 의 정보에 따라 그려준것임.) 
+            #  (인스턴스id 가 아님!!! 클래스id임!!! 지금 이거 Cityscapes"SemSeg"Evaluator 잖아!!! /21.3.30.9:12.) 
             #  groundTruthImgList 는 내플젝의경우 ~~_labelTrainIds.png 즉 클래스id(인데 train용 id (trainId)) 가 그려진 gt png 의 경로들의 리스트임. 
             #  (내플젝에선 현재는 label.trainId 랑 label.id 랑 똑같기때문에 상관없음. 
             #   만약 달랐으면, gt 로 사용할 ~~_labelIds.png 를 만들어주든지, 아니면 모델이 프레딕션한거 png 로 그려줄때 label.trainId 로 그려주면 되지.) 
