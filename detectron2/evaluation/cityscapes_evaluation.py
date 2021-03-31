@@ -126,8 +126,9 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         # https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/evaluation/evalInstanceLevelSemanticLabeling.py # noqa
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
 
-        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_instanceIds.png")) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:17. 
-        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
+        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_instanceIds.png")) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:17. 
+        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_instanceIds.png")) # i. 이걸 "*_labelTrainIds.png" 로 써놨었네;;;;; 아놔;;;; 지금 인스턴스레벨 이밸류에이션하는데;;; /21.3.30.23:47. 
+        
 
         assert len(
             groundTruthImgList
@@ -155,9 +156,10 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
 
         predictionImgList = []
         for gt in groundTruthImgList:
-            predictionImgList.append(cityscapes_eval.getPrediction(gt, cityscapes_eval.args)) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:26. 
-            # predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
+            # predictionImgList.append(cityscapes_eval.getPrediction(gt, cityscapes_eval.args)) # i. TODO 내플젝할때는 바로아래코드로 바꿔줘야함. /21.3.28.13:26. 
+            predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
         results = cityscapes_eval.evaluateImgLists(
+            # i. predictionImgList 라기보단 predictionTxtList 라고해야 더 맞겠지. /21.3.31.8:39. 
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )["averages"]
 
@@ -214,8 +216,8 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             return
         # Load the Cityscapes eval script *after* setting the required env var,
         # since the script reads CITYSCAPES_DATASET into global variables at load time.
-        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling as cityscapes_eval # i. TODO: 내플젝할때는 바로아랫줄코드 이용해야함. /21.3.30.10:29.나중작성. 
-        # import cityscapesscripts.evaluation.evalPixelLevelSemanticLabelingJ as cityscapes_eval 
+        # import cityscapesscripts.evaluation.evalPixelLevelSemanticLabeling as cityscapes_eval # i. TODO: 내플젝할때는 바로아랫줄코드 이용해야함. /21.3.30.10:29.나중작성. 
+        import cityscapesscripts.evaluation.evalPixelLevelSemanticLabelingJ as cityscapes_eval 
 
         self._logger.info("Evaluating results under {} ...".format(self._temp_dir))
 
@@ -230,13 +232,12 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
         gt_dir = PathManager.get_local_path(self._metadata.gt_dir)
 
         # i. 원소 하나 예시: ~~/cityscapes/gtFine/val/frankfurt/frankfurt_000000_000294_gtFine_labelIds.png /21.3.28.9:48. 
-        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png")) 
-        # i. TODO 내플젝 할때는 위 한줄 코멘트아웃하고 아래의 내 코드 한줄을 살려줘야함. /21.3.26.21:51. 
-        # i.21.3.24.20:34) 위 한줄을 바로아래한줄로 내가 변경해줬음. 잘 되나 모름. 해보는중.
+        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*", "*_gtFine_labelIds.png")) # i. TODO 내플젝 할때는 이한줄대신 아래의 내 코드 한줄을 살려줘야함. /21.3.26.21:51. 
+        # i.21.3.24.20:34) 위 한줄을 바로아래한줄로 내가 변경해줬음. 잘 되나 모름. 해보는중. 
         #  (cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py 에 설명 나오니까 보삼. 아직 제대로 안읽어봄.)
         #  암튼, 원래코드는 ~~labelIds.png 를 이용했는데, 이게 인스턴스id 가 아니고 카테고리id임.
-        #  ~~labelTrainIds.png 도 마찬가지로 카테고리id인데, train 용도의 카테고리id 인것 뿐이니까 이거 사용해도 될것으로 생각됨.
-        # groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
+        #  ~~labelTrainIds.png 도 마찬가지로 카테고리id인데, train 용도의 카테고리id 인것 뿐이니까 이거 사용해도 될것으로 생각됨. 
+        groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
 
         assert len(
             groundTruthImgList
@@ -274,8 +275,8 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             #  걍 간단한 방법으로 gt(하나의 gt png파일의 경로)에 대한 프레딕션결과png파일의 경로를 찾아서 predictionImgList 에 append 해주면 됨.
             #  음.. 간단한로직이긴한데 걍 getPredictionJ 라는 함수 만들어서 해야겠다.
             #
-            predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt)) # TODO 내플젝돌릴땐 이거말고 아래의 코드(getPredictionJ 함수 이용하는) 사용해야함. /21.3.28.12:11.
-            # predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
+            # predictionImgList.append(cityscapes_eval.getPrediction(cityscapes_eval.args, gt)) # TODO 내플젝돌릴땐 이거말고 아래의 코드(getPredictionJ 함수 이용하는) 사용해야함. /21.3.28.12:11.
+            predictionImgList.append(getPredictionJ(cityscapes_eval.args.predictionPath, gt))
         results = cityscapes_eval.evaluateImgLists( 
             # i.21.3.29.0:39) -> # i.21.3.29.22:49) 잘못알던부분 수정 (pred 나 gt 나 둘다 클래스id 들을 담고있음). 
             #  predictionImgList 는 모델이 프레딕션한 클래스id (label.trainId 말고 그냥 label.id) 들이 그려져있고 VOID는 255로 그려진 
