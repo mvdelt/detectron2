@@ -143,7 +143,7 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
         #  따라서, 지금 이 getPredictionJ 도 CityscapesSemSegEvaluator 의 evaluate 에서 사용해주는 getPredictionJ 와는 좀 다름. 
         def getPredictionJ(predTxtAndPngsDirpathJ, gtPngPathJ):
             gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_instanceIds.png" 
-            imgIdJ = gtPngFnameJ[:-len("_instanceIds.png")] # i. ex: "impA_BBB" 
+            imgIdJ = gtPngFnameJ[:-len("_instanceIds.png")] # i. ex: "impA_BBB"   # i. "_labelTrainIds.png" 라고 잘못써놨던거 "_instanceIds.png" 로 수정. /21.3.31.17:01. 
             # i. 이 리스트의 원소는 딱 1개일거임. 특정 이미지id 에 대응되는 프레딕션결과txt 파일은 1개. 
             #  참고로 프레딕션결과png파일은 각 이미지마다 해당 이미지의 인스턴스갯수만큼 생성되네. 바로위 process 보면. /21.3.28.14:07.
             predTxtPath_listJ = glob.glob(os.path.join(predTxtAndPngsDirpathJ, imgIdJ+"_pred.txt")) 
