@@ -396,6 +396,9 @@ def load_panopticSeg_dentPanoJ(image_dir, gt_dir, gt_json, meta): # i.21.3.12.20
                 #  근데..어쨋든 "pan_seg_file_name" 어노png에 모든 정보는 다 들어있는데, 굳이 "sem_seg_file_name" 은 왜 필요..??/21.3.10.18:49
                 # i.21.3.10.23:38) TODO Q: ->뭐지?? 지금 이 함수(load_cityscapes_panoptic)
                 #  에 대응되는 COCO 함수인 load_coco_panoptic_json 에서는 "sem_seg_file_name" 정보 안넣어주는데???
+                # i.21.4.13.22:58) ->cityscapes 의 이밸류에이션코드들(panoptic seg, semantic seg, instance seg 이렇게 3가지에대해 모두 이밸류에이션하지) 에서
+                #  요 "sem_seg_file_name" 의 정보를 사용했던것같음. cityscapes 이밸류에이션코드들(아마 sem seg 이밸류에이션코드겟지?) 보면 아마 나올거임. 
+                #  지금 그거볼시간없어서 걍 적어두기만 함. 
                 "sem_seg_file_name": sem_label_file, 
                 # i. 지금 cocoAnnoPngPath 은 COCO panoptic 형식의 어노png 파일인데(cityscapesscripts 코드에서 COCO panoptic 형식으로 변환해줌), 
                 #  Det2 형식의 "pan_seg_file_name"도 어차피 COCO panoptic 과 동일한 형식의 어노png(id값을 256진법으로 RGB로 변환한거. 
@@ -403,7 +406,7 @@ def load_panopticSeg_dentPanoJ(image_dir, gt_dir, gt_json, meta): # i.21.3.12.20
                 #  아래처럼 그냥 그대로 할당해줘도 됨./21.3.10.19:56.
                 "pan_seg_file_name": cocoAnnoPngPath, 
                 # i.21.3.18.9:38) 
-                #  (cityscapesscripts 의 createPanopticImgs.py 의 conver2panoptic 함수에서 만들어준) coco어노json 파일 (지금내치과파노플젝의경우 J_cocoformat_panoptic_train.json 로 이름붙였지)
+                #  (cityscapesscripts 의 createPanopticImgs.py 의 convert2panoptic 함수에서 만들어준) coco어노json 파일 (지금내치과파노플젝의경우 J_cocoformat_panoptic_train.json 로 이름붙였지)
                 #  의 segments_info 랑 똑같은데, 다만 각 segment_info 의 'category_id' 값만 trainId 로 바꿔준거임.(trainId 값은 CITYSCAPES_CATEGORIES_J 에서 가져온거고.)
                 #  바로 이 trainId 값들이 0,1,2,... 이렇게 "contiguous(연속적)" 하게 되어있고.
                 #  아마도 Det2 에서는 바로 이 contiguous 한 숫자들(각 segment_info 의 'category_id'. trainId값으로 셋팅해준.)을 가지고 클래스(카테고리)를 구분하는듯함.
