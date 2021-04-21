@@ -252,7 +252,7 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
         res["SQ_st"] = 100 * pq_res["Stuff"]["sq"]
         res["RQ_st"] = 100 * pq_res["Stuff"]["rq"]
 
-        results = OrderedDict({"panoptic_seg": res})
+        results = OrderedDict({"panoptic_seg_humanJ": res}) 
         _print_panoptic_results(pq_res)
 
         return results
