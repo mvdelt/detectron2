@@ -168,7 +168,8 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
                     #    즉, 굳이 모델의출력과 동일하게 만들려면, cityscapes 방식의 png 파일에서,
                     #  stuff 의 (픽셀에 기록된)값에다가 label_divisor 값 (현재 1000) 곱해주고,
                     #  thing 의 (픽셀에 기록된)값에다가 1 더해주면 됨. 
-                    #    근데 그렇게 하려면 할수있는데 지금 걍 이렇게만 해줘봄. 
+                    #    근데 그렇게 하려면 할수있는데 지금 걍 이렇게만 해줘봄. ->일단 이렇게만 해도 이밸류에이션 돌려본 결과는 stuff, thing 모두 만점임(예상대로). 
+                    #  TODO: 나중에 바로위에내가적은것처럼 모델의출력이랑 동일하게해서도 해보자. 혹시 결과 다른가. 
                     if panoptic_label < label_divisor:
                         pred_class = panoptic_label
                     else: 
