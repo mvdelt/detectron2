@@ -120,7 +120,9 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
             # i. 2) input 의 이미지에 대응되는 사람의 아웃풋결과를 찾음. /21.4.21.21:03.
             # i. 일단 테스트삼아 val용 어노테이션해준거 걍 사용해줘봄. 만약 코드가 잘 돌아간다면 평가점수가 죄다 만점이겠지. /21.4.21.20:51.
             file_name_png = os.path.splitext(file_name)[0] + "_instanceIds.png" # i. ex) imp4_188_instanceIds.png /21.4.21.20:54.
-            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_instanceIds.png  # i. 얘는 cityscapes 방식으로 id값들 기록된거라 모델의 출력이랑 조금 다른데(stuff 들은 1000안곱해져있고 뭐 그런식이었을거임), 걍 해보자. /21.4.21.21:01.
+            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_instanceIds.png  
+            # i. ->얘는 cityscapes 방식으로 id값들 기록된거라 모델의 출력이랑 조금 다른데(stuff 들은 1000안곱해져있고 뭐 그런식이었을거임), 걍 해보자. /21.4.21.21:01.
+            # i. ->안되네 ㅋㅋ. thing 들은 죄다 만점 나오는데, stuff 는 점수 엄청 낮음. 걍 모델의 출력처럼 바꿔주자. /21.4.21.21:43.
             png_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/val/", file_name_png)
             panoptic_img_numpy_fromHumanJ = np.array(Image.open(png_fromHumanJ))
 
@@ -155,7 +157,18 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
                     if panoptic_label == -1:
                         # VOID region.
                         continue
-                    pred_class = panoptic_label // label_divisor
+
+
+
+                    # pred_class = panoptic_label // label_divisor
+                    # i.21.4.21.21:52) 모델의 출력은 죄다 1000 이상인데, 지금 내가 사람결과 평가위해 이용해주려는건 cityscapes 형식대로라서 stuff 들은 값이 1000보다 작음. 이거해결위한코드. 
+                    if panoptic_label < label_divisor:
+                        pred_class = panoptic_label
+                    else: 
+                        pred_class = panoptic_label // label_divisor
+
+
+
                     isthing = (
                         pred_class in self._metadata.thing_dataset_id_to_contiguous_id.values()
                     )
