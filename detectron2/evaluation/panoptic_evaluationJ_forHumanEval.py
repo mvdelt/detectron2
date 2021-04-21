@@ -160,7 +160,8 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
 
 
 
-                    # pred_class = panoptic_label // label_divisor
+
+                    # pred_class = panoptic_label // label_divisor  # i. <-기존코드.
                     # i.21.4.21.21:52) 모델의 출력은 죄다 1000 이상인데, 지금 내가 사람결과 평가위해 이용해주려는건 cityscapes 형식대로라서 stuff 들은 값이 1000보다 작음. 이거해결위한코드. 
                     #    물론 이렇게해준다해서 모델의출력과 동일해지는건 아님. 
                     #  모델의 출력은 stuff 든 thing 이든 상관없이 걍 카테고리id 에다가 1000 곱한다음, thing 이면 1,2,3,... 이런식으로 1부터 더해줌. (0부터 더하는게 아니고).
@@ -174,6 +175,8 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
                         pred_class = panoptic_label
                     else: 
                         pred_class = panoptic_label // label_divisor
+
+
 
 
 
@@ -273,7 +276,7 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
         res["SQ_st"] = 100 * pq_res["Stuff"]["sq"]
         res["RQ_st"] = 100 * pq_res["Stuff"]["rq"]
 
-        results = OrderedDict({"panoptic_seg_humanJ": res}) 
+        results = OrderedDict({"panoptic_seg_humanEvalJ": res}) 
         _print_panoptic_results(pq_res)
 
         return results
