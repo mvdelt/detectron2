@@ -30,6 +30,7 @@ from detectron2.evaluation import (
     CityscapesSemSegEvaluator,
     COCOEvaluator,
     COCOPanopticEvaluator,
+    COCOPanopticEvaluatorJ_forHumanEval, # i.21.4.21.21:22) 추가. 
     DatasetEvaluators,
 )
 from detectron2.projects.deeplab import build_lr_scheduler
@@ -81,6 +82,7 @@ class Trainer(DefaultTrainer):
         evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
         if evaluator_type in ["cityscapes_panoptic_seg", "coco_panoptic_seg"]:
             evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder)) ########################################### /21.3.25.11:56.
+            evaluator_list.append(COCOPanopticEvaluatorJ_forHumanEval(dataset_name, output_folder)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.21.21:21. 
         if evaluator_type == "cityscapes_panoptic_seg":
             assert (
                 torch.cuda.device_count() >= comm.get_rank()
