@@ -1,5 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
+
 from .cityscapes_evaluation import CityscapesInstanceEvaluator, CityscapesSemSegEvaluator
+
+from .cityscapes_evaluationJ_forHumanEval import CityscapesSemSegEvaluatorJ_forHumanEval # i.21.4.22.10:12) 사람의결과 이밸류에이션위해 추가.(사람vs모델 해보려고). 
+
 from .coco_evaluation import COCOEvaluator
 from .rotated_coco_evaluation import RotatedCOCOEvaluator
 from .evaluator import DatasetEvaluator, DatasetEvaluators, inference_context, inference_on_dataset

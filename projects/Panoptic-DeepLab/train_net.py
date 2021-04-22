@@ -28,6 +28,7 @@ from detectron2.engine import DefaultTrainer, default_argument_parser, default_s
 from detectron2.evaluation import (
     CityscapesInstanceEvaluator,
     CityscapesSemSegEvaluator,
+    CityscapesSemSegEvaluatorJ_forHumanEval, # i.21.4.22.10:10) 추가. 
     COCOEvaluator,
     COCOPanopticEvaluator,
     COCOPanopticEvaluatorJ_forHumanEval, # i.21.4.21.21:22) 추가. 
@@ -88,7 +89,9 @@ class Trainer(DefaultTrainer):
                 torch.cuda.device_count() >= comm.get_rank()
             ), "CityscapesEvaluator currently do not work with multiple machines."
             evaluator_list.append(CityscapesSemSegEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
+            evaluator_list.append(CityscapesSemSegEvaluatorJ_forHumanEval(dataset_name)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.22.10:06. 
             evaluator_list.append(CityscapesInstanceEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
+            # i. ->사람은 스코어 내놓지 않으니까 AP 계산할수없어서 CityscapesInstanceEvaluator 는 따로 사람의결과 이밸류에이션 위해 수정해서 사용해주지 않았음. 
         if evaluator_type == "coco_panoptic_seg":
             # `thing_classes` in COCO panoptic metadata includes both thing and
             # stuff classes for visualization. COCOEvaluator requires metadata
