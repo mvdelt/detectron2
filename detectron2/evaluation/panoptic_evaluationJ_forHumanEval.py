@@ -118,14 +118,15 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
             file_name = os.path.basename(input["file_name"]) # i. ex) (하나의 input 에서) 'file_name': '/content/datasetsJ/panopticSeg_dentPanoJ/inputOriPano/val/imp4_188.jpg' /21.3.26.22:49.
 
             # i. 2) input 의 이미지에 대응되는 사람의 아웃풋결과를 찾음. /21.4.21.21:03.
-            # i. 일단 테스트삼아 val용 어노테이션해준거 걍 사용해줘봄. 만약 코드가 잘 돌아간다면 평가점수가 죄다 만점이겠지. /21.4.21.20:51.
+            # i. 일단 테스트삼아 val용 어노테이션해준거 걍 사용해줘봄. 만약 코드가 잘 돌아간다면 평가점수가 죄다 만점이겠지.->예상대로 만점나옴. /21.4.21.20:51. 
+            # i. 이제 사람의 아웃풋결과 담은 폴더 따로 만들어줬음("/content/datasetsJ/panopticSeg_dentPanoJ/gt/forHumanEval_thisIsNotGT"). /21.4.22.11:43.
             file_name_png = os.path.splitext(file_name)[0] + "_instanceIds.png" # i. ex) imp4_188_instanceIds.png /21.4.21.20:54.
-            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_instanceIds.png  
+            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/forHumanEval_thisIsNotGT/imp4_188_instanceIds.png  
             # i. ->얘는 cityscapes 방식으로 id값들 기록된거라 모델의 출력이랑 조금 다른데(stuff 들은 1000안곱해져있고 뭐 그런식이었을거임), 걍 해보자. /21.4.21.21:01.
             # i. ->안되네 ㅋㅋ. thing 들은 죄다 만점 나오는데, stuff 는 점수 엄청 낮음. 걍 모델의 출력처럼 바꿔주자. /21.4.21.21:43.
             # i. ->현재 모델의출력이랑 동일하지는 않은상태임. 죠아래에서 stuff 의 pred_class 가 죄다 0으로 되는 문제만 해결. 아직 다른문제 발견되진 않았음. /21.4.21.21:52쯤.
-            png_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/val/", file_name_png)
-            panoptic_img_numpy_fromHumanJ = np.array(Image.open(png_fromHumanJ))
+            png_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/forHumanEval_thisIsNotGT", file_name_png) 
+            png_arr_fromHumanJ = np.array(Image.open(png_fromHumanJ))
 
 
 
@@ -134,7 +135,7 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
 
 
             # panoptic_img = panoptic_img.cpu().numpy()
-            panoptic_img = panoptic_img_numpy_fromHumanJ
+            panoptic_img = png_arr_fromHumanJ
             segments_info = None # i. /21.4.21.21:11.
             if segments_info is None:
 

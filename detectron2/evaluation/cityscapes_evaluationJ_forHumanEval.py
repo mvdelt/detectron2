@@ -218,15 +218,15 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
             # i.21.4.22.9:51) 사람의 프레딕션결과를 이밸류에이션하기위해 작성한부분. output 은 모델의 아웃풋이라서 사용x. 
 
             # i. 1) 이 input 의 이미지에 해당하는 사람의 프레딕션결과 찾음. /21.4.22.9:33.
-            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_labelTrainIds.png
-            pred_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/val/", basename + "_labelTrainIds.png") # i. 일단 테스트로 걍 gt를 사용해줘봄. 잘돌아간다면 만점나오겟지. /21.4.22.9:24.
-            pred_fromHumanJ_arr = np.array(Image.open(pred_fromHumanJ))
+            # ex) /content/datasetsJ/panopticSeg_dentPanoJ/gt/forHumanEval_thisIsNotGT/imp4_188_labelTrainIds.png
+            pred_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/forHumanEval_thisIsNotGT", basename + "_labelTrainIds.png") 
+            pred_arr_fromHumanJ = np.array(Image.open(pred_fromHumanJ))
 
             # # i. 2) 프레딕션결과 처리해줄거있으면 처리해줌. /21.4.22.9:48. 
             # # i.21.4.22.9:45) 죠아래의 기존코드에서 가져온거.
             # #  내플젝에선 현재 ignoreInEval=True 인게 없고, 트레인id랑 그냥id(Label.id 즉 클래스를 구분하는 id)랑 똑같기때문에, 이과정 패스해도 됨.
             # #  만약 일반적으로 하려면, 이코드 사용하면 됨. 지금은 이코드 쓰나 안쓰나 똑같을거라서 걍 안쓴거임. 
-            # output = pred_fromHumanJ_arr
+            # output = pred_arr_fromHumanJ
             # pred = 255 * np.ones(output.shape, dtype=np.uint8)             
             # for train_id, label in trainId2label.items():
             #     if label.ignoreInEval:
@@ -238,7 +238,7 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
             # #      ~~_labelIds.png 생성하는 코드는 안만들었기때문에 ~~_labelTrainIds.png 를 사용해주려는거임. /21.4.22.9:56. 
 
             # i. 3) 처리된 프레딕션결과를 저장. /21.4.22.9:49.
-            Image.fromarray(pred_fromHumanJ_arr).save(pred_filename) 
+            Image.fromarray(pred_arr_fromHumanJ).save(pred_filename) 
 
 
 
