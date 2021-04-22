@@ -149,8 +149,8 @@ class CityscapesInstanceEvaluator(CityscapesEvaluator):
             predTxtPath_listJ = glob.glob(os.path.join(predTxtAndPngsDirpathJ, imgIdJ+"_pred.txt")) 
             assert len(predTxtPath_listJ)==1, f"j) predTxtPath_listJ 의 원소가 1개여야하는데 뭔가 이상하네!!! predTxtPath_listJ: {predTxtPath_listJ}" 
             predTxtPathJ = predTxtPath_listJ[0] # i. 리스트의 원소 1개일거니까 그것을 꺼내줌. /21.3.28.14:07. 
-            print(f'j) predTxtPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.txt') 
-            print(f'j) predTxtPathJ: {predTxtPathJ}')
+            # print(f'j) predTxtPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.txt') 
+            # print(f'j) predTxtPathJ: {predTxtPathJ}')
             return predTxtPathJ
 
 
@@ -254,8 +254,8 @@ class CityscapesSemSegEvaluator(CityscapesEvaluator):
             gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
             imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
             predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
-            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
-            print(f'j) predPngPathJ: {predPngPathJ}')
+            # print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
+            # print(f'j) predPngPathJ: {predPngPathJ}')
             return predPngPathJ
 
 
