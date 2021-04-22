@@ -123,6 +123,7 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
             # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_instanceIds.png  
             # i. ->얘는 cityscapes 방식으로 id값들 기록된거라 모델의 출력이랑 조금 다른데(stuff 들은 1000안곱해져있고 뭐 그런식이었을거임), 걍 해보자. /21.4.21.21:01.
             # i. ->안되네 ㅋㅋ. thing 들은 죄다 만점 나오는데, stuff 는 점수 엄청 낮음. 걍 모델의 출력처럼 바꿔주자. /21.4.21.21:43.
+            # i. ->현재 모델의출력이랑 동일하지는 않은상태임. 죠아래에서 stuff 의 pred_class 가 죄다 0으로 되는 문제만 해결. 아직 다른문제 발견되진 않았음. /21.4.21.21:52쯤.
             png_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/val/", file_name_png)
             panoptic_img_numpy_fromHumanJ = np.array(Image.open(png_fromHumanJ))
 
@@ -276,6 +277,7 @@ class COCOPanopticEvaluatorJ_forHumanEval(DatasetEvaluator):
         res["SQ_st"] = 100 * pq_res["Stuff"]["sq"]
         res["RQ_st"] = 100 * pq_res["Stuff"]["rq"]
 
+        # results = OrderedDict({"panoptic_seg": res}) 
         results = OrderedDict({"panoptic_seg_humanEvalJ": res}) 
         _print_panoptic_results(pq_res)
 

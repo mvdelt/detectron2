@@ -180,6 +180,7 @@ class CityscapesInstanceEvaluatorJ_forHumanEval(CityscapesEvaluator):
         )["averages"]
 
         ret = OrderedDict()
+        # ret["segm"] = {"AP": results["allAp"] * 100, "AP50": results["allAp50%"] * 100}
         ret["segm_humanEvalJ"] = {"AP": results["allAp"] * 100, "AP50": results["allAp50%"] * 100}
         self._working_dir.cleanup()
         return ret
@@ -207,21 +208,57 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
         for input, output in zip(inputs, outputs):
             file_name = input["file_name"] # i. ex) (하나의 input 에서) 'file_name': '/content/datasetsJ/panopticSeg_dentPanoJ/inputOriPano/val/imp4_188.jpg' /21.3.26.22:49. 복붙/21.4.22.0:51.
             basename = os.path.splitext(os.path.basename(file_name))[0] # i. ex) imp4_188 /21.4.22.0:52. 
-            pred_filename = os.path.join(self._temp_dir, basename + "_pred.png")
+            # pred_filename = os.path.join(self._temp_dir, basename + "_pred.png")
+            pred_filename = os.path.join(self._temp_dir, basename + "_pred_fromHumanJ.png")
 
-            #  COCOPanopticEvaluator 에선 output["panoptic_seg"] 를,
-            #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
-            #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용. COCOPanopticEvaluator 에 내가 적어놓은것 참고. /21.3.29.22:20. 
-            output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy() # i. vTODO 이부분 조사아직못함. /21.3.27.21:30. ->이해완료. Det2 문서 모델 아웃풋 부분 참고. /21.3.29.20:57. 
-            pred = 255 * np.ones(output.shape, dtype=np.uint8) # i. 1 들로 채우네. 상관없나? 어차피 모든영역 다 그려주나? vTODO output["sem_seg"] 가 뭔지 조사필요. /21.3.27.21:30.
-            # i. -> 1이아니고 255로 채우는거잖아;; /21.3.29.21:16.
-            for train_id, label in trainId2label.items():
-                if label.ignoreInEval:
-                    continue
-                # i.21.3.29.23:31) 여기선 label.id 로 그려줬지만, 필요에따라 label.trainId 로 그려줘야할수도있지. 내플젝이 그렇지(내플젝에선 현재는 label.id 랑 label.trainId 가 같아서 상관없지만). 
-                #  (참고로, 내가 '그려'준다는 표현을 쓰고있는데, 이미지의 각 픽셀값을 id 등의 값으로 정해주고있어서 '그린다'는 표현을 쓰고있는중임.) 
-                pred[output == train_id] = label.id 
-            Image.fromarray(pred).save(pred_filename)
+
+
+
+
+            # i.21.4.22.9:51) 사람의 프레딕션결과를 이밸류에이션하기위해 작성한부분. output 은 모델의 아웃풋이라서 사용x. 
+
+            # i. 1) 이 input 의 이미지에 해당하는 사람의 프레딕션결과 찾음. /21.4.22.9:33.
+            # /content/datasetsJ/panopticSeg_dentPanoJ/gt/val/imp4_188_labelTrainIds.png
+            pred_fromHumanJ = os.path.join("/content/datasetsJ/panopticSeg_dentPanoJ/gt/val/", basename + "_labelTrainIds.png") # i. 일단 테스트로 걍 gt를 사용해줘봄. 잘돌아간다면 만점나오겟지. /21.4.22.9:24.
+            pred_fromHumanJ_arr = np.array(Image.open(pred_fromHumanJ))
+
+            # # i. 2) 프레딕션결과 처리해줄거있으면 처리해줌. /21.4.22.9:48. 
+            # # i.21.4.22.9:45) 죠아래의 기존코드에서 가져온거.
+            # #  내플젝에선 현재 ignoreInEval=True 인게 없고, 트레인id랑 그냥id(Label.id 즉 클래스를 구분하는 id)랑 똑같기때문에, 이과정 패스해도 됨.
+            # #  만약 일반적으로 하려면, 이코드 사용하면 됨. 지금은 이코드 쓰나 안쓰나 똑같을거라서 걍 안쓴거임. 
+            # output = pred_fromHumanJ_arr
+            # pred = 255 * np.ones(output.shape, dtype=np.uint8)             
+            # for train_id, label in trainId2label.items():
+            #     if label.ignoreInEval:
+            #         continue
+            #     pred[output == train_id] = label.trainId  
+            # # i. ->내플젝에선 label.id 가 아닌 label.trainId 로 해줘야함. gt로 ~~_labelTrainIds.png 를 사용해줄거니까. 
+            # #      (지금현재는 내플젝에서 모든클래스에서 Label.id 랑 Label.trainId 가 동일하기때문에 상관없지만.) 
+            # #      참고: 혹시나중에까먹을까봐 적어두자면, 내가수정한 cityscapesscripts_mvdeltGithub 에서 ~~_labelTrainIds.png 생성하는코드만 만들어줬고
+            # #      ~~_labelIds.png 생성하는 코드는 안만들었기때문에 ~~_labelTrainIds.png 를 사용해주려는거임. /21.4.22.9:56. 
+
+            # i. 3) 처리된 프레딕션결과를 저장. /21.4.22.9:49.
+            Image.fromarray(pred_fromHumanJ_arr).save(pred_filename) 
+
+
+
+
+
+
+
+            # #  COCOPanopticEvaluator 에선 output["panoptic_seg"] 를,
+            # #  CityscapesSemSegEvaluator 에선 output["sem_seg"] 를, 
+            # #  CityscapesInstanceEvaluator 에선 output["instances"] 를 이용. COCOPanopticEvaluator 에 내가 적어놓은것 참고. /21.3.29.22:20. 
+            # output = output["sem_seg"].argmax(dim=0).to(self._cpu_device).numpy() # i. vTODO 이부분 조사아직못함. /21.3.27.21:30. ->이해완료. Det2 문서 모델 아웃풋 부분 참고. /21.3.29.20:57. 
+            # pred = 255 * np.ones(output.shape, dtype=np.uint8) # i. 1 들로 채우네. 상관없나? 어차피 모든영역 다 그려주나? vTODO output["sem_seg"] 가 뭔지 조사필요. /21.3.27.21:30.
+            # # i. ->1이아니고 255로 채우는거잖아;; /21.3.29.21:16.
+            # for train_id, label in trainId2label.items():
+            #     if label.ignoreInEval:
+            #         continue
+            #     # i.21.3.29.23:31) 여기선 label.id 로 그려줬지만, 필요에따라 label.trainId 로 그려줘야할수도있지. 내플젝이 그렇지(내플젝에선 현재는 label.id 랑 label.trainId 가 같아서 상관없지만). 
+            #     #  (참고로, 내가 '그려'준다는 표현을 쓰고있는데, 이미지의 각 픽셀값을 id 등의 값으로 정해주고있어서 '그린다'는 표현을 쓰고있는중임.) 
+            #     pred[output == train_id] = label.id 
+            # Image.fromarray(pred).save(pred_filename)
 
     def evaluate(self):
         
@@ -253,6 +290,9 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
         #  (cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py 에 설명 나오니까 보삼. 아직 제대로 안읽어봄.)
         #  암튼, 원래코드는 ~~labelIds.png 를 이용했는데, 이게 인스턴스id 가 아니고 카테고리id임.
         #  ~~labelTrainIds.png 도 마찬가지로 카테고리id인데, train 용도의 카테고리id 인것 뿐이니까 이거 사용해도 될것으로 생각됨. 
+        #    ->죠위에 process 메서드에서 pred[output == train_id] = label.id 일케해서 트레인id 가 아닌 그냥id 값으로 그려주잖아. 
+        #      그러니까 원래코드처럼 ~~labelIds.png 를 이용해야지. 다만, 지금내플젝에선 트레인id 가 그냥id랑 같으니까 
+        #      이렇게 ~~labeltrainIds.png 를 사용해도 상관없겠지만. /21.4.22.1:11. 
         groundTruthImgList = glob.glob(os.path.join(gt_dir, "*_labelTrainIds.png"))
 
         assert len(
@@ -269,8 +309,10 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
         def getPredictionJ(predPngDirpathJ, gtPngPathJ):
             gtPngFnameJ = os.path.basename(gtPngPathJ) # i. "~~_labelTrainIds.png"
             imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
-            predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
-            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
+            # predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
+            predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred_fromHumanJ.png"))[0] 
+            # print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
+            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred_fromHumanJ.png') 
             print(f'j) predPngPathJ: {predPngPathJ}')
             return predPngPathJ
 
@@ -308,6 +350,7 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
             predictionImgList, groundTruthImgList, cityscapes_eval.args
         )
         ret = OrderedDict()
+        # ret["sem_seg"] = {
         ret["sem_seg_humanEvalJ"] = {
             "IoU": 100.0 * results["averageScoreClasses"],
             "iIoU": 100.0 * results["averageScoreInstClasses"],
