@@ -83,13 +83,13 @@ class Trainer(DefaultTrainer):
         evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
         if evaluator_type in ["cityscapes_panoptic_seg", "coco_panoptic_seg"]:
             evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder)) ########################################### /21.3.25.11:56.
-            evaluator_list.append(COCOPanopticEvaluatorJ_forHumanEval(dataset_name, output_folder)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.21.21:21. 
+            # evaluator_list.append(COCOPanopticEvaluatorJ_forHumanEval(dataset_name, output_folder)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.21.21:21. 
         if evaluator_type == "cityscapes_panoptic_seg":
             assert (
                 torch.cuda.device_count() >= comm.get_rank()
             ), "CityscapesEvaluator currently do not work with multiple machines."
             evaluator_list.append(CityscapesSemSegEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
-            evaluator_list.append(CityscapesSemSegEvaluatorJ_forHumanEval(dataset_name)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.22.10:06. 
+            # evaluator_list.append(CityscapesSemSegEvaluatorJ_forHumanEval(dataset_name)) ############## 사람의결과 이밸류에이션 위해 추가. /21.4.22.10:06. 
             evaluator_list.append(CityscapesInstanceEvaluator(dataset_name)) ########################################### /21.3.25.11:56.
             # i. ->사람은 스코어 내놓지 않으니까 AP 계산할수없어서 CityscapesInstanceEvaluator 는 따로 사람의결과 이밸류에이션 위해 수정해서 사용해주지 않았음. 
         if evaluator_type == "coco_panoptic_seg":
