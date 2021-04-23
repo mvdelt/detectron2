@@ -279,6 +279,8 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
         cityscapes_eval.args.predictionWalk = None
         cityscapes_eval.args.JSONOutput = False
         cityscapes_eval.args.colorized = False
+        # i.21.4.22.17:33) 이밸류에이션 출력결과에서 모델 사람 누구의결과인지 출력해주려고 내가 추가해줘봄. 
+        cityscapes_eval.args.modelNameJ = 'humanJ'
 
         # These lines are adopted from
         # https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/evaluation/evalPixelLevelSemanticLabeling.py # noqa
@@ -311,9 +313,9 @@ class CityscapesSemSegEvaluatorJ_forHumanEval(CityscapesEvaluator):
             imgIdJ = gtPngFnameJ[:-len("_labelTrainIds.png")] # i. ex: "impA_BBB"
             # predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred.png"))[0] 
             predPngPathJ = glob.glob(os.path.join(predPngDirpathJ, imgIdJ+"_pred_fromHumanJ.png"))[0] 
-            # print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
-            print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred_fromHumanJ.png') 
-            print(f'j) predPngPathJ: {predPngPathJ}')
+            # # print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred.png') 
+            # print(f'j) predPngPathJ 예상: /임시/폴더의/경로/impA_BBB_pred_fromHumanJ.png') 
+            # print(f'j) predPngPathJ: {predPngPathJ}')
             return predPngPathJ
 
 
